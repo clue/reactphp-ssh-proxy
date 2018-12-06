@@ -11,9 +11,9 @@ use React\ChildProcess\Process;
  * @return array
  * @internal
  */
-function fds($path = '/proc/self/fd')
+function fds($path = '/dev/fd')
 {
-    // try to get list of all open FDs (Linux only) or simply assume range 0-1024 (FD_SETSIZE)
+    // try to get list of all open FDs (Linux/Mac and others) or simply assume range 0-1024 (FD_SETSIZE)
     $fds = @\scandir($path);
 
     return $fds !== false ? $fds : \range(0, 1024);
