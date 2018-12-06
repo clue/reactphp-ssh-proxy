@@ -13,10 +13,24 @@ use React\ChildProcess\Process;
  */
 function fds($path = '/dev/fd')
 {
-    // try to get list of all open FDs (Linux/Mac and others) or simply assume range 0-1024 (FD_SETSIZE)
+    // Try to get list of all open FDs (Linux/Mac and others)
     $fds = @\scandir($path);
 
-    return $fds !== false ? $fds : \range(0, 1024);
+    // Otherwise try temporarily duplicating file descriptors in the range 0-1024 (FD_SETSIZE).
+    // This is known to work on more exotic platforms and also inside chroot
+    // environments without /dev/fd. Causes many syscalls, but still rather fast.
+    if ($fds === false) {
+        $fds = array();
+        for ($i = 0; $i <= 1024; ++$i) {
+            $copy = @\fopen('php://fd/' . $i, 'r');
+            if ($copy !== false) {
+                $fds[] = $i;
+                \fclose($copy);
+            }
+        }
+    }
+
+    return $fds;
 }
 
 /**

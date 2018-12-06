@@ -41,15 +41,29 @@ class FunctionsTest extends TestCase
         $this->assertInternalType('array', $fds);
     }
 
+    public function testFdsWithInvalidPathReturnsSubsetOfFdsFromDevFd()
+    {
+        if (@scandir('/dev/fd') === false) {
+            $this->markTestSkipped('Unable to read /dev/fd');
+        }
+
+        $fds = Io\fds();
+        $second = Io\fds('/dev/null');
+
+        foreach ($second as $one) {
+            $this->assertContains($one, $fds);
+        }
+    }
+
     public function testProcessWithoutFdsReturnsProcessWithoutClosingDefaultHandles()
     {
         $process = Io\processWithoutFds('sleep 10');
 
         $this->assertInstanceOf('React\ChildProcess\Process', $process);
 
-        $this->assertNotContains('0>&-', $process->getCommand());
-        $this->assertNotContains('1>&-', $process->getCommand());
-        $this->assertNotContains('2>&-', $process->getCommand());
+        $this->assertNotContains(' 0>&-', $process->getCommand());
+        $this->assertNotContains(' 1>&-', $process->getCommand());
+        $this->assertNotContains(' 2>&-', $process->getCommand());
     }
 
     public function testProcessWithoutFdsReturnsProcessWithOriginalCommandPartOfActualCommandWhenDescriptorsNeedToBeClosed()
