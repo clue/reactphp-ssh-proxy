@@ -39,9 +39,12 @@ existing higher-level protocol implementation.
 **Table of contents**
 
 * [Quickstart example](#quickstart-example)
+* [API](#api)
+    * [SshProcessConnector](#sshprocessconnector)
+    * [SshSocksConnector](#sshsocksconnector)
 * [Usage](#usage)
-  * [SshProcessConnector](#sshprocessconnector)
     * [Plain TCP connections](#plain-tcp-connections)
+    * [Secure TLS connections](#secure-tls-connections)
     * [HTTP requests](#http-requests)
     * [Connection timeout](#connection-timeout)
     * [DNS resolution](#dns-resolution)
@@ -80,7 +83,7 @@ $loop->run();
 
 See also the [examples](examples).
 
-## Usage
+## API
 
 ### SshProcessConnector
 
@@ -92,8 +95,12 @@ any destination by using an intermediary SSH server as a proxy server.
 ```
 
 This class is implemented as a lightweight process wrapper around the `ssh`
-client binary, so you'll have to make sure that you have a suitable SSH client
-installed. On Debian/Ubuntu-based systems, you may simply install it like this:
+client binary, so it will spawn one `ssh` process for each connection. For
+example, if you [open a connection](#plain-tcp-connections) to
+`tcp://reactphp.org:80`, it will run the equivalent of `ssh -W reactphp.org:80 user@example.com`
+and forward data from its standard I/O streams. For this to work, you'll have to
+make sure that you have a suitable SSH client installed. On Debian/Ubuntu-based
+systems, you may simply install it like this:
 
 ```bash
 $ sudo apt install openssh-client
@@ -110,7 +117,18 @@ The proxy URL may or may not contain a scheme and port definition. The default
 port will be `22` for SSH, but you may have to use a custom port depending on
 your SSH server setup.
 
-This is the main class in this package.
+Keep in mind that this class is implemented as a lightweight process wrapper
+around the `ssh` client binary and that it will spawn one `ssh` process for each
+connection. If you open more connections, it will spawn one `ssh` process for
+each connection. Each process will take some time to create a new SSH connection
+and then keep running until the connection is closed, so you're recommended to
+limit the total number of concurrent connections. If you plan to only use a
+single or few connections (such as a single database connection), using this
+class is the recommended approach. If you plan to create multiple connections or
+have a larger number of connections (such as an HTTP client), you're recommended
+to use the [`SshSocksConnector`](#sshsocksconnector) instead.
+
+This is one of the two main classes in this package.
 Because it implements ReactPHP's standard
 [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface),
 it can simply be used in place of a normal connector.
@@ -131,16 +149,105 @@ higher-level component:
 + $client = new SomeClient($proxy);
 ```
 
-#### Plain TCP connections
+### SshSocksConnector
+
+The `SshSocksConnector` is responsible for creating plain TCP/IP connections to
+any destination by using an intermediary SSH server as a proxy server.
+
+```
+[you] -> [proxy] -> [destination]
+```
+
+This class is implemented as a lightweight process wrapper around the `ssh`
+client binary and it will spawn one `ssh` process on demand for multiple
+connections. For example, once you [open a connection](#plain-tcp-connections)
+to `tcp://reactphp.org:80` for the first time, it will run the equivalent of
+`ssh -D 1080 user@example.com` to run the SSH client in local SOCKS proxy server
+mode and will then create a SOCKS client connection to this server process. You
+can create any number of connections over this one process and it will keep this
+process running while there are any open connections and will automatically
+close if when it is idle. For this to work, you'll have to make sure that you
+have a suitable SSH client installed. On Debian/Ubuntu-based systems, you may
+simply install it like this:
+
+```bash
+$ sudo apt install openssh-client
+```
+
+Its constructor simply accepts an SSH proxy server URL and a loop to bind to:
+
+```php
+$loop = React\EventLoop\Factory::create();
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+```
+
+The proxy URL may or may not contain a scheme and port definition. The default
+port will be `22` for SSH, but you may have to use a custom port depending on
+your SSH server setup.
+
+Keep in mind that this class is implemented as a lightweight process wrapper
+around the `ssh` client binary and that it will spawn one `ssh` process for
+multiple connections. This process will take some time to create a new SSH
+connection and then keep running until the last connection is closed. If you
+plan to create multiple connections or have a larger number of concurrent
+connections (such as an HTTP client), using this class is the recommended
+approach. If you plan to only use a single or few connections (such as a single
+database connection), you're recommended to use the [`SshProcessConnector`](#sshprocessconnector)
+instead.
+
+This class defaults to spawning the SSH client process in SOCKS proxy server
+mode listening on `127.0.0.1:1080`. If this port is already in use or if you want
+to use multiple instances of this class to connect to different SSH proxy
+servers, you may optionally pass a unique bind address like this:
+
+```php
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com?bind=127.1.1.1:1081', $loop);
+```
+
+> *Security note for multi-user systems*: This class will spawn the SSH client
+  process in local SOCKS server mode and will accept connections only on the
+  localhost interface by default. If you're running on a multi-user system,
+  other users on the same system may be able to connect to this proxy server and
+  create connections over it. If this applies to your deployment, you're
+  recommended to use the [`SshProcessConnector](#sshprocessconnector) instead
+  or set up custom firewall rules to prevent unauthorized access to this port.
+
+This is one of the two main classes in this package.
+Because it implements ReactPHP's standard
+[`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface),
+it can simply be used in place of a normal connector.
+Accordingly, it provides only a single public method, the
+[`connect()`](https://github.com/reactphp/socket#connect) method.
+The `connect(string $uri): PromiseInterface<ConnectionInterface, Exception>`
+method can be used to establish a streaming connection.
+It returns a [Promise](https://github.com/reactphp/promise) which either
+fulfills with a [ConnectionInterface](https://github.com/reactphp/socket#connectioninterface)
+on success or rejects with an `Exception` on error.
+
+This makes it fairly simple to add SSH proxy support to pretty much any
+higher-level component:
+
+```diff
+- $client = new SomeClient($connector);
++ $proxy = new SshSocksConnector('user@example.com', $loop);
++ $client = new SomeClient($proxy);
+```
+
+## Usage
+
+### Plain TCP connections
 
 SSH proxy servers are commonly used to issue HTTPS requests to your destination.
 However, this is actually performed on a higher protocol layer and this
-connector is actually inherently a general-purpose plain TCP/IP connector.
-As documented above, you can simply invoke its `connect()` method to establish
-a streaming plain TCP/IP connection and use any higher level protocol like so:
+project is actually inherently a general-purpose plain TCP/IP connector.
+As documented above, you can simply invoke the `connect()` method to establish
+a streaming plain TCP/IP connection on the `SshProcessConnector` or `SshSocksConnector`
+and use any higher level protocol like so:
 
 ```php
-$proxy = new SshProcessConnector('user@example.com', $connector);
+$proxy = new SshProcessConnector('user@example.com', $loop);
+// or
+$proxy = new SshSocksConnector('user@example.com', $loop);
 
 $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
     $stream->write("EHLO local\r\n");
@@ -150,8 +257,8 @@ $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInter
 });
 ```
 
-You can either use the `SshProcessConnector` directly or you may want to wrap this connector
-in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
+You can either use the `SshProcessConnector` or `SshSocksConnector` directly or you
+may want to wrap this connector in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 
 ```php
 $connector = new Connector($loop, array(
@@ -167,12 +274,45 @@ $connector->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionI
 });
 ```
 
-Keep in mind that this class is implemented as a lightweight process wrapper
-around the `ssh` client binary, so it will spawn one `ssh` process for each
-connection. Each process will keep running until the connection is closed, so
-you're recommended to limit the total number of concurrent connections.
+For this example, you can use either the `SshProcessConnector` or `SshSocksConnector`.
+Keep in mind that this project is implemented as a lightweight process wrapper
+around the `ssh` client binary. While the `SshProcessConnector` will spawn one
+`ssh` process for each connection, the `SshSocksConnector` will spawn one `ssh`
+process that will be shared for multiple connections, see also above for more
+details.
 
-#### HTTP requests
+### Secure TLS connections
+
+The `SshSocksConnector` can also be used if you want to establish a secure TLS connection
+(formerly known as SSL) between you and your destination, such as when using
+secure HTTPS to your destination site. You can simply wrap this connector in
+ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector) or the
+low-level [`SecureConnector`](https://github.com/reactphp/socket#secureconnector):
+
+```php
+$proxy = new SshSocksConnector('user@example.com', $loop);
+
+$connector = new Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => false
+));
+
+$connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionInterface $stream) {
+    $stream->write("EHLO local\r\n");
+    $stream->on('data', function ($chunk) use ($stream) {
+        echo $chunk;
+    });
+});
+```
+
+> Note how secure TLS connections are in fact entirely handled outside of
+  this SSH proxy client implementation.
+  The `SshProcessConnector` does not currently support secure TLS connections
+  because PHP's underlying crypto functions require a socket resource and do not
+  work for virtual connections. As an alternative, you're recommended to use the
+  `SshSocksConnector` as given in the above example.
+
+### HTTP requests
 
 HTTP operates on a higher layer than this low-level SSH proxy implementation.
 If you want to issue HTTP requests, you can add a dependency for
@@ -180,12 +320,14 @@ If you want to issue HTTP requests, you can add a dependency for
 It can interact with this library by issuing all HTTP requests through your SSH
 proxy server, similar to how it can issue
 [HTTP requests through an HTTP CONNECT proxy server](https://github.com/clue/reactphp-buzz#http-proxy).
-At the moment, this only works for plaintext HTTP requests.
+When using the `SshSocksConnector` (recommended), this works for both plain HTTP
+and TLS-encrypted HTTPS requests. When using the `SshProcessConnector`, this only
+works for plaintext HTTP requests.
 
-#### Connection timeout
+### Connection timeout
 
-By default, the `SshProcessConnector` does not implement any timeouts for establishing remote
-connections.
+By default, neither the `SshProcessConnector` nor the `SshSocksConnector` implement
+any timeouts for establishing remote connections.
 Your underlying operating system may impose limits on pending and/or idle TCP/IP
 connections, anywhere in a range of a few minutes to several hours.
 
@@ -216,12 +358,12 @@ See also any of the [examples](examples).
 > Note how the connection timeout is in fact entirely handled outside of this
   SSH proxy client implementation.
 
-#### DNS resolution
+### DNS resolution
 
-By default, the `SshProcessConnector` does not perform any DNS resolution at all and simply
-forwards any hostname you're trying to connect to the remote proxy server.
-The remote proxy server is thus responsible for looking up any hostnames via DNS
-(this default mode is thus called *remote DNS resolution*).
+By default, neither the `SshProcessConnector` nor the `SshSocksConnector` perform
+any DNS resolution at all and simply forwards any hostname you're trying to
+connect to the remote proxy server. The remote proxy server is thus responsible
+for looking up any hostnames via DNS (this default mode is thus called *remote DNS resolution*).
 
 As an alternative, you can also send the destination IP to the remote proxy
 server.
@@ -229,13 +371,13 @@ In this mode you either have to stick to using IPs only (which is ofen unfeasabl
 or perform any DNS lookups locally and only transmit the resolved destination IPs
 (this mode is thus called *local DNS resolution*).
 
-The default *remote DNS resolution* is useful if your local `SshProcessConnector` either can
-not resolve target hostnames because it has no direct access to the internet or
-if it should not resolve target hostnames because its outgoing DNS traffic might
-be intercepted.
+The default *remote DNS resolution* is useful if your local `SshProcessConnector` 
+or `SshSocksConnector` either can not resolve target hostnames because it has no
+direct access to the internet or if it should not resolve target hostnames
+because its outgoing DNS traffic might be intercepted.
 
-As noted above, the `SshProcessConnector` defaults to using remote DNS resolution.
-However, wrapping the `SshProcessConnector` in ReactPHP's
+As noted above, the `SshProcessConnector` and `SshSocksConnector` default to using
+remote DNS resolution. However, wrapping them in ReactPHP's
 [`Connector`](https://github.com/reactphp/socket#connector) actually
 performs local DNS resolution unless explicitly defined otherwise.
 Given that remote DNS resolution is assumed to be the preferred mode, all
@@ -261,7 +403,7 @@ $connector = new Connector($loop, array(
 > Note how local DNS resolution is in fact entirely handled outside of this
   SSH proxy client implementation.
 
-#### Password authentication
+### Password authentication
 
 Note that this class is implemented as a lightweight process wrapper around the
 `ssh` client binary. It works under the assumption that you have verified you
@@ -286,7 +428,9 @@ If your SSH proxy server requires password authentication, you may pass the
 username and password as part of the SSH proxy server URL like this:
 
 ```php
-$proxy = new SshProcessConnector('user:pass@example.com', $connector);
+$proxy = new SshProcessConnector('user:pass@example.com', $loop);
+// or
+$proxy = new SshSocksConnector('user:pass@example.com', $loop);
 ```
 
 For this to work, you will have to have the `sshpass` binary installed. On
@@ -305,7 +449,7 @@ $pass = 'p@ss';
 
 $proxy = new SshProcessConnector(
     rawurlencode($user) . ':' . rawurlencode($pass) . '@example.com:2222',
-    $connector
+    $loop
 );
 ```
 
