@@ -195,12 +195,22 @@ approach. If you plan to only use a single or few connections (such as a single
 database connection), you're recommended to use the [`SshProcessConnector`](#sshprocessconnector)
 instead.
 
+This class defaults to spawning the SSH client process in SOCKS proxy server
+mode listening on `127.0.0.1:1080`. If this port is already in use or if you want
+to use multiple instances of this class to connect to different SSH proxy
+servers, you may optionally pass a unique bind address like this:
+
+```php
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com?bind=127.1.1.1:1081', $loop);
+```
+
 > *Security note for multi-user systems*: This class will spawn the SSH client
-  process in local SOCKS server mode and will accept connections on the
-  localhost interface only. If you're running on a multi-user system, other
-  users on the same system may be able to connect to this proxy server and
+  process in local SOCKS server mode and will accept connections only on the
+  localhost interface by default. If you're running on a multi-user system,
+  other users on the same system may be able to connect to this proxy server and
   create connections over it. If this applies to your deployment, you're
-  recommended to use the [`SshProcessConnector](#sshprocessconnector) instead.
+  recommended to use the [`SshProcessConnector](#sshprocessconnector) instead
+  or set up custom firewall rules to prevent unauthorized access to this port.
 
 This is one of the two main classes in this package.
 Because it implements ReactPHP's standard

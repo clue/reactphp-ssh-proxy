@@ -76,6 +76,19 @@ class FunctionalSshSocksConnectorTest extends TestCase
         $connection->close();
     }
 
+    public function testConnectValidTargetWillReturnPromiseWhichResolvesToConnectionForCustomBindAddress()
+    {
+        $this->connector = new SshSocksConnector(getenv('SSH_PROXY') . '?bind=127.0.0.1:1081', $this->loop);
+        $promise = $this->connector->connect('example.com:80');
+
+        $connection = \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
+
+        $this->assertInstanceOf('React\Socket\ConnectionInterface', $connection);
+        $this->assertTrue($connection->isReadable());
+        $this->assertTrue($connection->isWritable());
+        $connection->close();
+    }
+
     public function testConnectValidTargetWillNotInheritActiveFileDescriptors()
     {
         $server = stream_socket_server('tcp://127.0.0.1:0');

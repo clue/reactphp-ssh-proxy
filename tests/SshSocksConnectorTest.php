@@ -50,6 +50,28 @@ class SshSocksConnectorTest extends TestCase
         $this->assertEquals('exec sshpass -p \'pass\' ssh -v -o ExitOnForwardFailure=yes -N -D \'127.0.0.1:1080\' \'user@host\'', $ref->getValue($connector));
     }
 
+    public function testConstructorAcceptsUriWithCustomBindUrl()
+    {
+        $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+        $connector = new SshSocksConnector('host?bind=127.1.0.1:2711', $loop);
+
+        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref->setAccessible(true);
+
+        $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.1.0.1:2711\' \'host\'', $ref->getValue($connector));
+    }
+
+    public function testConstructorAcceptsUriWithCustomBindUrlIpv6()
+    {
+        $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+        $connector = new SshSocksConnector('host?bind=[::1]:2711', $loop);
+
+        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref->setAccessible(true);
+
+        $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'[::1]:2711\' \'host\'', $ref->getValue($connector));
+    }
+
     /**
      * @expectedException InvalidArgumentException
      */
@@ -84,6 +106,15 @@ class SshSocksConnectorTest extends TestCase
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         new SshSocksConnector('-host', $loop);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testConstructorThrowsForInvalidBindHost()
+    {
+        $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+        new SshSocksConnector('host?bind=example:1080', $loop);
     }
 
     /**

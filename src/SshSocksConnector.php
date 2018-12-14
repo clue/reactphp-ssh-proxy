@@ -18,7 +18,7 @@ class SshSocksConnector implements ConnectorInterface
 
     private $debug = false;
 
-    private $port;
+    private $bind = '127.0.0.1:1080';
     private $socks;
 
     private $listen;
@@ -65,9 +65,18 @@ class SshSocksConnector implements ConnectorInterface
             $this->cmd .= '-p ' . $parts['port'] . ' ';
         }
 
-        $this->port = 1080;
-        $this->socks = new Client('socks4://127.0.0.1:' . $this->port, new TcpConnector($loop));
-        $this->cmd .= '-D ' . \escapeshellarg('127.0.0.1:' . $this->port) . ' ' . \escapeshellarg($target);
+        $args = array();
+        \parse_str(parse_url($uri, \PHP_URL_QUERY), $args);
+        if (isset($args['bind'])) {
+            $parts = parse_url('tcp://' . $args['bind']);
+            if (!isset($parts['scheme'], $parts['host'], $parts['port']) || \filter_var(\trim($parts['host'], '[]'), \FILTER_VALIDATE_IP) === false) {
+                throw new \InvalidArgumentException('Invalid bind address given');
+            }
+            $this->bind = $args['bind'];
+        }
+
+        $this->socks = new Client('socks4://' . $this->bind, new TcpConnector($loop));
+        $this->cmd .= '-D ' . \escapeshellarg($this->bind) . ' ' . \escapeshellarg($target);
         $this->loop = $loop;
     }
 
