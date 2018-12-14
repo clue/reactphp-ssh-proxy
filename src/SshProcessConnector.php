@@ -46,8 +46,8 @@ class SshProcessConnector implements ConnectorInterface
         }
         $this->cmd .= 'ssh -vv ';
 
-        // disable interactive password prompt if no password was given (see sshpass below)
-        if (!isset($parts['pass'])) {
+        // disable interactive password prompt if no password was given (see sshpass above)
+        if ($pass === null) {
             $this->cmd .= '-o BatchMode=yes ';
         }
 
