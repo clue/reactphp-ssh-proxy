@@ -10,7 +10,7 @@
 // $ php examples/11-proxy-https.php
 //
 // For illustration purposes only. If you want to send HTTP requests in a real
-// world project, take a look at https://github.com/clue/reactphp-buzz#http-proxy
+// world project, take a look at https://github.com/clue/reactphp-buzz#ssh-proxy
 
 use Clue\React\SshProxy\SshSocksConnector;
 use React\Socket\Connector;

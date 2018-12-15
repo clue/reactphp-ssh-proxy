@@ -14,7 +14,7 @@
 // $ php examples/02-optional-proxy-http.php
 //
 // For illustration purposes only. If you want to send HTTP requests in a real
-// world project, take a look at https://github.com/clue/reactphp-buzz#http-proxy
+// world project, take a look at https://github.com/clue/reactphp-buzz#ssh-proxy
 
 use Clue\React\SshProxy\SshProcessConnector;
 use React\Socket\Connector;
