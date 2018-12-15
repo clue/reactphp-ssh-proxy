@@ -317,9 +317,8 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
 HTTP operates on a higher layer than this low-level SSH proxy implementation.
 If you want to issue HTTP requests, you can add a dependency for
 [clue/reactphp-buzz](https://github.com/clue/reactphp-buzz).
-It can interact with this library by issuing all HTTP requests through your SSH
-proxy server, similar to how it can issue
-[HTTP requests through an HTTP CONNECT proxy server](https://github.com/clue/reactphp-buzz#http-proxy).
+It can interact with this library by issuing all
+[HTTP requests through an SSH proxy server](https://github.com/clue/reactphp-buzz#ssh-proxy).
 When using the `SshSocksConnector` (recommended), this works for both plain HTTP
 and TLS-encrypted HTTPS requests. When using the `SshProcessConnector`, this only
 works for plaintext HTTP requests.
