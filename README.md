@@ -457,11 +457,14 @@ $proxy = new SshProcessConnector(
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
+This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/reactphp-ssh-proxy:dev-master
+$ composer require clue/reactphp-ssh-proxy:^1.0
 ```
+
+See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 
 This project aims to run on any platform and thus does not require any PHP
 extensions and supports running on legacy PHP 5.3 through current PHP 7+ and
