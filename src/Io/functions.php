@@ -42,12 +42,21 @@ function fds($path = '/dev/fd')
  */
 function processWithoutFds($command)
 {
+    // launch process with default STDIO pipes
+    $pipes = array(
+        array('pipe', 'r'),
+        array('pipe', 'w'),
+        array('pipe', 'w')
+    );
+
     // try to get list of all open FDs
     $fds = fds();
 
-    // do not inherit open FDs by explicitly closing all of them
+    // do not inherit open FDs by explicitly overwriting existing FDs with dummy files
+    // additionally, close all dummy files in the child process again
     foreach ($fds as $fd) {
         if ($fd > 2) {
+            $pipes[$fd] = array('file', '/dev/null', 'r');
             $command .= ' ' . $fd . '>&-';
         }
     }
@@ -57,5 +66,5 @@ function processWithoutFds($command)
         $command = 'exec bash -c ' . escapeshellarg($command);
     }
 
-    return new Process($command);
+    return new Process($command, null, null, $pipes);
 }
