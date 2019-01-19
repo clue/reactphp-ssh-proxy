@@ -11,7 +11,8 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Clue\\React\\SshProxy\\": "src/" }
+        "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
+        "files": [ "src/Io/functions.php" ]
     },
     "require": {
         "php": ">=5.3",

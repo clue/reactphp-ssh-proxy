@@ -195,27 +195,7 @@ class SshSocksConnector implements ConnectorInterface
 
     private function listen()
     {
-        $command = $this->cmd;
-
-        // try to get list of all open FDs (Linux only) or simply assume range 3-1024 (FD_SETSIZE)
-        $fds = @scandir('/proc/self/fd');
-        if ($fds === false) {
-            $fds = range(3, 1024); // @codeCoverageIgnore
-        }
-
-        // do not inherit open FDs by explicitly closing all of them
-        foreach ($fds as $fd) {
-            if ($fd > 2) {
-                $command .= ' ' . $fd . '>&-';
-            }
-        }
-
-        // default `sh` only accepts single-digit FDs, so run in bash if needed
-        if ($fds && max($fds) > 9) {
-            $command = 'exec bash -c ' . escapeshellarg($command);
-        }
-
-        $process = new Process($command);
+        $process = Io\processWithoutFds($this->cmd);
         $process->start($this->loop);
 
         $deferred = new Deferred(function () use ($process) {
