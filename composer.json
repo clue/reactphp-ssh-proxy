@@ -11,12 +11,13 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Clue\\React\\SshProxy\\": "src/" }
+        "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
+        "files": [ "src/Io/functions.php" ]
     },
     "require": {
         "php": ">=5.3",
         "clue/socks-react": "^1.0",
-        "react/child-process": "^0.5",
+        "react/child-process": "^0.6",
         "react/event-loop": "^1.0 || ^0.5",
         "react/promise": "^2.1 || ^1.2.1",
         "react/socket": "^1.1",

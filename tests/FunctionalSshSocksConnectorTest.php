@@ -89,7 +89,7 @@ class FunctionalSshSocksConnectorTest extends TestCase
         $connection->close();
     }
 
-    public function testConnectValidTargetWillNotInheritActiveFileDescriptors()
+    public function testConnectPendingWillNotInheritActiveFileDescriptors()
     {
         $server = stream_socket_server('tcp://127.0.0.1:0');
         $address = stream_socket_get_name($server, false);
@@ -103,17 +103,15 @@ class FunctionalSshSocksConnectorTest extends TestCase
             $this->markTestSkipped('Platform does not prevent binding to same address (Windows?)');
         }
 
-        // wait for successful connection
         $promise = $this->connector->connect('example.com:80');
-        $connection = \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
 
         // close server and ensure we can start a new server on the previous address
-        // the open SSH connection process should not inherit the existing server socket
+        // the pending SSH connection process should not inherit the existing server socket
         fclose($server);
         $server = stream_socket_server('tcp://' . $address);
         $this->assertTrue(is_resource($server));
-
         fclose($server);
-        $connection->close();
+
+        $promise->cancel();
     }
 }
