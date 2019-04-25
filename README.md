@@ -46,6 +46,7 @@ existing higher-level protocol implementation.
     * [Plain TCP connections](#plain-tcp-connections)
     * [Secure TLS connections](#secure-tls-connections)
     * [HTTP requests](#http-requests)
+    * [Database tunnel](#database-tunnel)
     * [Connection timeout](#connection-timeout)
     * [DNS resolution](#dns-resolution)
     * [Password authentication](#password-authentication)
@@ -322,6 +323,51 @@ It can interact with this library by issuing all
 When using the `SshSocksConnector` (recommended), this works for both plain HTTP
 and TLS-encrypted HTTPS requests. When using the `SshProcessConnector`, this only
 works for plaintext HTTP requests.
+
+### Database tunnel
+
+We should now have a basic understanding of how we can tunnel any TCP/IP-based
+protocol over an SSH proxy server. Besides using this to access "external"
+services, this is also particularly useful because it allows you to access
+network services otherwise only local to this SSH server from the outside, such
+as a firewalled database server.
+
+For example, this allows us to combine an
+[async MySQL database client](https://github.com/friends-of-reactphp/mysql) and
+the above SSH proxy server setup, so we can access a firewalled MySQL database
+server through an SSH tunnel. Here's the gist:
+
+```php
+$loop = React\EventLoop\Factory::create();
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+
+$uri = 'test:test@localhost/test';
+$factory = new React\MySQL\Factory($loop, $proxy);
+$connection = $factory->createLazyConnection($uri);
+
+$connection->query('SELECT * FROM book')->then(
+    function (QueryResult $command) {
+        echo count($command->resultRows) . ' row(s) in set' . PHP_EOL;
+    },
+    function (Exception $error) {
+        echo 'Error: ' . $error->getMessage() . PHP_EOL;
+    }
+);
+
+$connection->quit();
+
+$loop->run();
+```
+
+See also [example #21](examples) for more details.
+
+This example will automatically launch the `ssh` client binary to create the
+connection to a database server that can not otherwise be accessed from the
+outside. From the perspective of the database server, this looks just like a
+regular, local connection. From this code's perspective, this will create a
+regular, local connection which just happens to use a secure SSH tunnel to
+transport this to a remote server, so you can send any query like you would to a
+local database server.
 
 ### Connection timeout
 
