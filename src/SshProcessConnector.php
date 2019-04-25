@@ -69,6 +69,10 @@ class SshProcessConnector implements ConnectorInterface
         $process = Io\processWithoutFds($command);
         $process->start($this->loop);
 
+        if ($this->debug) {
+            echo 'Launched "' . $command . '" with PID ' . $process->getPid() . PHP_EOL; // @codeCoverageIgnore
+        }
+
         $deferred = new Deferred(function () use ($process, $uri) {
             $process->stdin->close();
             $process->terminate();
@@ -76,11 +80,13 @@ class SshProcessConnector implements ConnectorInterface
             throw new \RuntimeException('Connection to ' . $uri . ' cancelled while waiting for SSH client');
         });
 
-        // process STDERR one line at a time
+        // pause STDOUT and process STDERR one line at a time until connection is ready
+        $process->stdout->pause();
         $last = null;
+        $connected = false;
         $debug = $this->debug;
         $stderr = new LineSeparatedReader($process->stderr);
-        $stderr->on('data', function ($line) use ($deferred, $process, $uri, &$last, $debug) {
+        $stderr->on('data', function ($line) use ($deferred, $process, $uri, &$last, $debug, &$connected) {
             // remember last line for error output in case process exits
             $last = $line;
 
@@ -109,11 +115,26 @@ class SshProcessConnector implements ConnectorInterface
                 return;
             }
 
+            // channel is ready, so resume STDOUT stream and resolve connection
+            $process->stdout->resume();
             $connection = new CompositeConnection($process->stdout, $process->stdin);
             $deferred->resolve($connection);
+            $connected = true;
         });
 
-        $process->on('exit', function ($code) use ($deferred, $uri, &$last) {
+        // If STDERR closes before connection was established, explicitly close STDOUT stream.
+        // The STDOUT stream starts in a paused state and as such will prevent the process exit
+        // logic from triggering when it is not resumed.
+        $stderr->on('close', function () use ($process, &$connected) {
+            if (!$connected) {
+                $process->stdout->close();
+            }
+        });
+
+        $process->on('exit', function ($code) use ($deferred, $uri, &$last, $debug) {
+            if ($debug) {
+                echo 'Process exit with code ' . $code . PHP_EOL; // @codeCoverageIgnore
+            }
             $deferred->reject(new \RuntimeException(
                 'Connection to ' . $uri . ' failed because SSH client died (' . $last . ')',
                 $code
