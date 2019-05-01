@@ -18,6 +18,7 @@ matrix:
   include:
     - php: 5.3
       dist: precise
+      install: composer remove react/mysql --dev --no-interaction # do not install react/mysql example on legacy PHP
   allow_failures:
     - php: hhvm
 
