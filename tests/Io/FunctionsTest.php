@@ -47,6 +47,10 @@ class FunctionsTest extends TestCase
             $this->markTestSkipped('Unable to read /dev/fd');
         }
 
+        if (defined('HHVM_VERSION')) {
+            $this->markTestSkipped('Not supported on HHVM');
+        }
+
         $fds = Io\fds();
         $second = Io\fds('/dev/null');
 
