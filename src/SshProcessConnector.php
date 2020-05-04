@@ -34,7 +34,7 @@ class SshProcessConnector implements ConnectorInterface
         // URI must use optional ssh:// scheme, must contain host and neither pass nor target must start with dash
         $parts = \parse_url((\strpos($uri, '://') === false ? 'ssh://' : '') . $uri);
         $pass = isset($parts['pass']) ? \rawurldecode($parts['pass']) : null;
-        $target = (isset($parts['user']) ? \rawurldecode($parts['user']) . '@' : '') . $parts['host'];
+        $target = (isset($parts['user']) ? \rawurldecode($parts['user']) . '@' : '') . (isset($parts['host']) ? $parts['host'] : '');
         if (!isset($parts['scheme'], $parts['host']) || $parts['scheme'] !== 'ssh' || (isset($pass[0]) && $pass[0] === '-') || $target[0] === '-') {
             throw new \InvalidArgumentException('Invalid SSH server URI');
         }
