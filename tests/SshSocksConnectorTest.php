@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\SshProxy;
+
 use PHPUnit\Framework\TestCase;
 use Clue\React\SshProxy\SshSocksConnector;
 use React\Promise\Deferred;
@@ -11,7 +13,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.0.0.1:1080\' \'host\'', $ref->getValue($connector));
@@ -22,7 +24,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('host:22', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.0.0.1:1080\' \'host\'', $ref->getValue($connector));
@@ -33,7 +35,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('user@host:2222', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -p 2222 -D \'127.0.0.1:1080\' \'user@host\'', $ref->getValue($connector));
@@ -44,7 +46,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('user:pass@host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec sshpass -p \'pass\' ssh -v -o ExitOnForwardFailure=yes -N -D \'127.0.0.1:1080\' \'user@host\'', $ref->getValue($connector));
@@ -55,7 +57,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('host?bind=127.1.0.1:2711', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.1.0.1:2711\' \'host\'', $ref->getValue($connector));
@@ -66,7 +68,7 @@ class SshSocksConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshSocksConnector('host?bind=[::1]:2711', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'[::1]:2711\' \'host\'', $ref->getValue($connector));
@@ -189,7 +191,7 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $timer = $this->getMockBuilder('React\EventLoop\TimerInterface')->getMock();
-        $ref = new ReflectionProperty($connector, 'idleTimer');
+        $ref = new \ReflectionProperty($connector, 'idleTimer');
         $ref->setAccessible(true);
         $ref->setValue($connector, $timer);
 
@@ -207,13 +209,13 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $deferred = new Deferred();
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, $deferred->promise());
 
         $promise = $connector->connect('google.com:80');
 
-        $deferred->reject(new RuntimeException('foobar'));
+        $deferred->reject(new \RuntimeException('foobar'));
 
         $exception = null;
         $promise->then(null, function ($reason) use (&$exception) {
@@ -229,7 +231,7 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $deferred = new Deferred();
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, $deferred->promise());
 
@@ -239,7 +241,7 @@ class SshSocksConnectorTest extends TestCase
         $second = $connector->connect('google.com:80');
         $second->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
 
-        $deferred->reject(new InvalidArgumentException());
+        $deferred->reject(new \InvalidArgumentException());
     }
 
     public function testConnectCancellationWithFailingSshListenerShouldAddTimerOnce()
@@ -250,14 +252,14 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $deferred = new Deferred();
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, $deferred->promise());
 
         $promise = $connector->connect('google.com:80');
         $promise->cancel();
 
-        $deferred->reject(new InvalidArgumentException());
+        $deferred->reject(new \InvalidArgumentException());
     }
 
     public function testConnectWithSuccessfulSshListenerWillInvokeSocksConnector()
@@ -266,7 +268,7 @@ class SshSocksConnectorTest extends TestCase
 
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, \React\Promise\resolve(null));
 
@@ -274,7 +276,7 @@ class SshSocksConnectorTest extends TestCase
         $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
         $socks->expects($this->once())->method('connect')->with('google.com:80')->willReturn($deferred->promise());
 
-        $ref = new ReflectionProperty($connector, 'socks');
+        $ref = new \ReflectionProperty($connector, 'socks');
         $ref->setAccessible(true);
         $ref->setValue($connector, $socks);
 
@@ -292,17 +294,17 @@ class SshSocksConnectorTest extends TestCase
 
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $deferred = new Deferred(function () {
-            throw new RuntimeException('SOCKS cancelled');
+            throw new \RuntimeException('SOCKS cancelled');
         });
         $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
-        $ref = new ReflectionProperty($connector, 'socks');
+        $ref = new \ReflectionProperty($connector, 'socks');
         $ref->setAccessible(true);
         $ref->setValue($connector, $socks);
 
@@ -327,7 +329,7 @@ class SshSocksConnectorTest extends TestCase
 
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, \React\Promise\resolve(null));
 
@@ -335,13 +337,13 @@ class SshSocksConnectorTest extends TestCase
         $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
-        $ref = new ReflectionProperty($connector, 'socks');
+        $ref = new \ReflectionProperty($connector, 'socks');
         $ref->setAccessible(true);
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');
 
-        $deferred->reject(new RuntimeException('Connection failed'));
+        $deferred->reject(new \RuntimeException('Connection failed'));
 
         $exception = null;
         $promise->then(null, function ($reason) use (&$exception) {
@@ -356,7 +358,7 @@ class SshSocksConnectorTest extends TestCase
 
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, \React\Promise\resolve(null));
 
@@ -367,7 +369,7 @@ class SshSocksConnectorTest extends TestCase
         $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
-        $ref = new ReflectionProperty($connector, 'socks');
+        $ref = new \ReflectionProperty($connector, 'socks');
         $ref->setAccessible(true);
         $ref->setValue($connector, $socks);
 
@@ -383,7 +385,7 @@ class SshSocksConnectorTest extends TestCase
 
         $connector = new SshSocksConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'listen');
+        $ref = new \ReflectionProperty($connector, 'listen');
         $ref->setAccessible(true);
         $ref->setValue($connector, \React\Promise\resolve(null));
 
@@ -394,7 +396,7 @@ class SshSocksConnectorTest extends TestCase
         $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
-        $ref = new ReflectionProperty($connector, 'socks');
+        $ref = new \ReflectionProperty($connector, 'socks');
         $ref->setAccessible(true);
         $ref->setValue($connector, $socks);
 

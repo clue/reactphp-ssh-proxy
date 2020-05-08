@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\SshProxy;
+
 use Clue\React\SshProxy\SshProcessConnector;
 use PHPUnit\Framework\TestCase;
 use React\EventLoop\Factory;
@@ -12,7 +14,7 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $loop = Factory::create();
         $connector = new SshProcessConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
         $ref->setValue($connector, 'echo "debug2: channel 0: open confirm rwindow 2097152 rmax 32768" >&2; #');
 
@@ -27,7 +29,7 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $loop = Factory::create();
         $connector = new SshProcessConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
         $ref->setValue($connector, 'echo "channel 0: open failed: administratively prohibited: open failed" >&2; #');
 
@@ -42,7 +44,7 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $loop = Factory::create();
         $connector = new SshProcessConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
         $ref->setValue($connector, 'echo foo >&2; #');
 
@@ -57,7 +59,7 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $loop = Factory::create();
         $connector = new SshProcessConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
         $ref->setValue($connector, 'echo "debug2: channel 0: open confirm rwindow 2097152 rmax 32768" >&2; echo foo #');
 
