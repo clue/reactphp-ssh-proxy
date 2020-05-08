@@ -14,6 +14,9 @@
         "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
         "files": [ "src/Io/functions.php" ]
     },
+    "autoload-dev": {
+        "psr-4": { "Clue\\Tests\\React\\SshProxy\\": "tests/"} 
+    },
     "require": {
         "php": ">=5.3",
         "clue/socks-react": "^1.0",

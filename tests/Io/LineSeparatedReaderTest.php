@@ -80,7 +80,7 @@ class LineSeparatedReaderTest extends TestCase
         $input = new ThroughStream();
         $stream = new LineSeparatedReader($input);
 
-        $error = new RuntimeException();
+        $error = new \RuntimeException();
         $stream->on('error', $this->expectCallableOnceWith($error));
         $stream->on('close', $this->expectCallableOnce());
 

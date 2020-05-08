@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\SshProxy;
+
 use PHPUnit\Framework\TestCase;
 use Clue\React\SshProxy\SshProcessConnector;
 
@@ -10,7 +12,7 @@ class SshProcessConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshProcessConnector('host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes \'host\'', $ref->getValue($connector));
@@ -21,7 +23,7 @@ class SshProcessConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshProcessConnector('host:22', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes \'host\'', $ref->getValue($connector));
@@ -32,7 +34,7 @@ class SshProcessConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshProcessConnector('user@host:2222', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes -p 2222 \'user@host\'', $ref->getValue($connector));
@@ -43,7 +45,7 @@ class SshProcessConnectorTest extends TestCase
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
         $connector = new SshProcessConnector('user:pass@host', $loop);
 
-        $ref = new ReflectionProperty($connector, 'cmd');
+        $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
 
         $this->assertEquals('exec sshpass -p \'pass\' ssh -vv \'user@host\'', $ref->getValue($connector));
