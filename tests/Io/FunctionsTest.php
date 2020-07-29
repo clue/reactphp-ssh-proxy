@@ -1,7 +1,7 @@
 <?php
 
 use Clue\React\SshProxy\Io;
-use PHPUnit\Framework\TestCase;
+use \Clue\Tests\React\SshProxy\TestCase;
 
 class FunctionsTest extends TestCase
 {
@@ -9,7 +9,7 @@ class FunctionsTest extends TestCase
     {
         $fds = Io\fds();
 
-        $this->assertInternalType('array', $fds);
+        $this->assertEquals('array', gettype($fds));
     }
 
     public function testFdsReturnsArrayWithStdioHandles()
@@ -38,7 +38,7 @@ class FunctionsTest extends TestCase
     {
         $fds = Io\fds('/dev/null');
 
-        $this->assertInternalType('array', $fds);
+        $this->assertEquals('array', gettype($fds));
     }
 
     public function testFdsWithInvalidPathReturnsSubsetOfFdsFromDevFd()
@@ -65,9 +65,9 @@ class FunctionsTest extends TestCase
 
         $this->assertInstanceOf('React\ChildProcess\Process', $process);
 
-        $this->assertNotContains(' 0>&-', $process->getCommand());
-        $this->assertNotContains(' 1>&-', $process->getCommand());
-        $this->assertNotContains(' 2>&-', $process->getCommand());
+        $this->assertNotContainsString(' 0>&-', $process->getCommand());
+        $this->assertNotContainsString(' 1>&-', $process->getCommand());
+        $this->assertNotContainsString(' 2>&-', $process->getCommand());
     }
 
     public function testProcessWithoutFdsReturnsProcessWithOriginalCommandPartOfActualCommandWhenDescriptorsNeedToBeClosed()
@@ -84,6 +84,6 @@ class FunctionsTest extends TestCase
         $this->assertInstanceOf('React\ChildProcess\Process', $process);
 
         $this->assertNotEquals('sleep 10', $process->getCommand());
-        $this->assertContains('sleep 10', $process->getCommand());
+        $this->assertContainsString('sleep 10', $process->getCommand());
     }
 }

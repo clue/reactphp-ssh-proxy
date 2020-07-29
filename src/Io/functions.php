@@ -8,7 +8,7 @@ use React\ChildProcess\Process;
  * Returns a list of active file descriptors (may contain bogus entries)
  *
  * @param string $path
- * @return array
+ * @return int[]
  * @internal
  */
 function fds($path = '/dev/fd')
@@ -27,6 +27,10 @@ function fds($path = '/dev/fd')
                 $fds[] = $i;
                 \fclose($copy);
             }
+        }
+    } else {
+        foreach ($fds as $i => $fd) {
+            $fds[$i] = (int) $fd;
         }
     }
 

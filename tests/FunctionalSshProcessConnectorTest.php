@@ -13,7 +13,10 @@ class FunctionalSshProcessConnectorTest extends TestCase
     private $loop;
     private $connector;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function setUpConnector()
     {
         $url = getenv('SSH_PROXY');
         if ($url === false) {
@@ -24,38 +27,29 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $this->connector = new SshProcessConnector($url, $this->loop);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to example.com:80 failed because SSH client died
-     */
     public function testConnectInvalidProxyUriWillReturnRejectedPromise()
     {
         $this->connector = new SshProcessConnector(getenv('SSH_PROXY') . '.invalid', $this->loop);
         $promise = $this->connector->connect('example.com:80');
 
+        $this->setExpectedException('RuntimeException', 'Connection to example.com:80 failed because SSH client died');
         \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to example.invalid:80 rejected:
-     */
     public function testConnectInvalidTargetWillReturnRejectedPromise()
     {
         $promise = $this->connector->connect('example.invalid:80');
 
+        $this->setExpectedException('RuntimeException', 'Connection to example.invalid:80 rejected:');
         \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to example.com:80 cancelled while waiting for SSH client
-     */
     public function testCancelConnectWillReturnRejectedPromise()
     {
         $promise = $this->connector->connect('example.com:80');
         $promise->cancel();
 
+        $this->setExpectedException('RuntimeException', 'Connection to example.com:80 cancelled while waiting for SSH client');
         \Clue\React\Block\await($promise, $this->loop, 0);
     }
 

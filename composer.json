@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "clue/block-react": "^1.3",
-        "phpunit/phpunit": "^7.4 || ^6.4 || ^5.0 || ^4.8.36",
+        "phpunit/phpunit": "^9.0 || ^5.7 || ^4.8.36",
         "react/mysql": "^0.5.3"
     }
 }

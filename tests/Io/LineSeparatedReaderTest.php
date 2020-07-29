@@ -1,7 +1,7 @@
 <?php
 
 use Clue\React\SshProxy\Io\LineSeparatedReader;
-use PHPUnit\Framework\TestCase;
+use \Clue\Tests\React\SshProxy\TestCase;
 use React\Stream\ThroughStream;
 
 class LineSeparatedReaderTest extends TestCase
@@ -129,43 +129,5 @@ class LineSeparatedReaderTest extends TestCase
         $ret = $stream->pipe($dest);
 
         $this->assertSame($dest, $ret);
-    }
-
-    protected function expectCallableOnce()
-    {
-        $mock = $this->createCallableMock();
-
-        $mock
-            ->expects($this->once())
-            ->method('__invoke');
-
-        return $mock;
-    }
-
-    protected function expectCallableOnceWith($value)
-    {
-        $mock = $this->createCallableMock();
-
-        $mock
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($value);
-
-        return $mock;
-    }
-
-    protected function expectCallableNever()
-    {
-        $mock = $this->createCallableMock();
-        $mock
-            ->expects($this->never())
-            ->method('__invoke');
-
-        return $mock;
-    }
-
-    protected function createCallableMock()
-    {
-        return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
 }

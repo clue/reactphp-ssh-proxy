@@ -2,7 +2,6 @@
 
 namespace Clue\Tests\React\SshProxy;
 
-use PHPUnit\Framework\TestCase;
 use Clue\React\SshProxy\SshProcessConnector;
 
 class SshProcessConnectorTest extends TestCase
@@ -51,39 +50,35 @@ class SshProcessConnectorTest extends TestCase
         $this->assertEquals('exec sshpass -p \'pass\' ssh -vv \'user@host\'', $ref->getValue($connector));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidUri()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshProcessConnector('///', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidUser()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshProcessConnector('-invalid@host', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidPass()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshProcessConnector('user:-invalid@host', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidHost()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshProcessConnector('-host', $loop);
     }
 
@@ -112,22 +107,5 @@ class SshProcessConnectorTest extends TestCase
 
         $promise = $connector->connect('-host:80');
         $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('InvalidArgumentException')));
-    }
-
-    protected function expectCallableOnceWith($value)
-    {
-        $mock = $this->createCallableMock();
-
-        $mock
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($value);
-
-        return $mock;
-    }
-
-    protected function createCallableMock()
-    {
-        return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
 }
