@@ -2,7 +2,6 @@
 
 namespace Clue\Tests\React\SshProxy;
 
-use PHPUnit\Framework\TestCase;
 use Clue\React\SshProxy\SshSocksConnector;
 use React\Promise\Deferred;
 
@@ -74,48 +73,42 @@ class SshSocksConnectorTest extends TestCase
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'[::1]:2711\' \'host\'', $ref->getValue($connector));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidUri()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+        $this->setExpectedException('InvalidArgumentException');
         new SshSocksConnector('///', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidUser()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshSocksConnector('-invalid@host', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidPass()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshSocksConnector('user:-invalid@host', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidHost()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshSocksConnector('-host', $loop);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorThrowsForInvalidBindHost()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+
+        $this->setExpectedException('InvalidArgumentException');
         new SshSocksConnector('host?bind=example:1080', $loop);
     }
 
@@ -137,10 +130,6 @@ class SshSocksConnectorTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('InvalidArgumentException')));
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to google.com:80 cancelled
-     */
     public function testConnectCancellationShouldReturnRejectedPromiseAndStartIdleTimer()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
@@ -155,6 +144,8 @@ class SshSocksConnectorTest extends TestCase
         $promise->then(null, function ($reason) use (&$exception) {
             $exception = $reason;
         });
+
+        $this->setExpectedException('RuntimeException', 'Connection to google.com:80 cancelled');
         throw $exception;
     }
 
@@ -198,10 +189,6 @@ class SshSocksConnectorTest extends TestCase
         $connector->connect('google.com:80');
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to google.com:80 failed because SSH client process died (foobar)
-     */
     public function testConnectWithFailingSshListenerShouldReturnRejectedPromise()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
@@ -221,6 +208,8 @@ class SshSocksConnectorTest extends TestCase
         $promise->then(null, function ($reason) use (&$exception) {
             $exception = $reason;
         });
+
+        $this->setExpectedException('RuntimeException', 'Connection to google.com:80 failed because SSH client process died (foobar)');
         throw $exception;
     }
 
@@ -283,10 +272,6 @@ class SshSocksConnectorTest extends TestCase
         $promise = $connector->connect('google.com:80');
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage SOCKS cancelled
-     */
     public function testConnectCancellationWithSuccessfulSshListenerWillCancelSocksConnectorAndStartIdleTimer()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
@@ -315,13 +300,11 @@ class SshSocksConnectorTest extends TestCase
         $promise->then(null, function ($reason) use (&$exception) {
             $exception = $reason;
         });
+
+        $this->setExpectedException('RuntimeException', 'SOCKS cancelled');
         throw $exception;
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection failed
-     */
     public function testConnectWithSuccessfulSshListenerButFailingSocksConnectorShouldReturnRejectedPromiseAndStartIdleTimer()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
@@ -349,6 +332,8 @@ class SshSocksConnectorTest extends TestCase
         $promise->then(null, function ($reason) use (&$exception) {
             $exception = $reason;
         });
+
+        $this->setExpectedException('RuntimeException', 'Connection failed');
         throw $exception;
     }
 
@@ -403,22 +388,5 @@ class SshSocksConnectorTest extends TestCase
         $promise = $connector->connect('google.com:80');
 
         $connection->emit('close');
-    }
-
-    protected function expectCallableOnceWith($value)
-    {
-        $mock = $this->createCallableMock();
-
-        $mock
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($value);
-
-        return $mock;
-    }
-
-    protected function createCallableMock()
-    {
-        return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
 }

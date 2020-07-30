@@ -2,7 +2,6 @@
 
 namespace Clue\Tests\React\SshProxy;
 
-use PHPUnit\Framework\TestCase;
 use React\EventLoop\Factory;
 use Clue\React\SshProxy\SshSocksConnector;
 
@@ -13,7 +12,10 @@ class FunctionalSshSocksConnectorTest extends TestCase
     private $loop;
     private $connector;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function setUpConnector()
     {
         $url = getenv('SSH_PROXY');
         if ($url === false) {
@@ -24,45 +26,39 @@ class FunctionalSshSocksConnectorTest extends TestCase
         $this->connector = new SshSocksConnector($url, $this->loop);
     }
 
-    public function tearDown()
+    /**
+     * @after
+     */
+    public function tearDownSSHClientProcess()
     {
         // run loop in order to shut down SSH client process again
         \Clue\React\Block\sleep(0.001, $this->loop);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to example.com:80 failed because SSH client process died
-     */
     public function testConnectInvalidProxyUriWillReturnRejectedPromise()
     {
         $this->connector = new SshSocksConnector(getenv('SSH_PROXY') . '.invalid', $this->loop);
 
         $promise = $this->connector->connect('example.com:80');
 
+        $this->setExpectedException('RuntimeException', 'Connection to example.com:80 failed because SSH client process died');
         \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to tcp://example.invalid:80 failed because connection to proxy was lost
-     */
     public function testConnectInvalidTargetWillReturnRejectedPromise()
     {
         $promise = $this->connector->connect('example.invalid:80');
 
+        $this->setExpectedException('RuntimeException', 'Connection to tcp://example.invalid:80 failed because connection to proxy was lost');
         \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Connection to example.com:80 cancelled while waiting for SSH client
-     */
     public function testCancelConnectWillReturnRejectedPromise()
     {
         $promise = $this->connector->connect('example.com:80');
         $promise->cancel();
 
+        $this->setExpectedException('RuntimeException', 'Connection to example.com:80 cancelled while waiting for SSH client');
         \Clue\React\Block\await($promise, $this->loop, 0);
     }
 

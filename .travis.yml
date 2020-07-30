@@ -3,7 +3,7 @@ language: php
 # lock distro so new future defaults will not break the build
 dist: trusty
 
-matrix:
+jobs:
   include:
     - php: 5.3
       dist: precise
@@ -20,10 +20,8 @@ matrix:
   allow_failures:
     - php: hhvm-3.18
 
-sudo: false
-
 install:
-  - composer install --no-interaction
+  - composer install 
 
 script:
   - vendor/bin/phpunit --coverage-text
