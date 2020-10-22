@@ -315,14 +315,36 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
 
 ### HTTP requests
 
-HTTP operates on a higher layer than this low-level SSH proxy implementation.
-If you want to issue HTTP requests, you can add a dependency for
-[clue/reactphp-buzz](https://github.com/clue/reactphp-buzz).
-It can interact with this library by issuing all
-[HTTP requests through an SSH proxy server](https://github.com/clue/reactphp-buzz#ssh-proxy).
-When using the `SshSocksConnector` (recommended), this works for both plain HTTP
+This library also allows you to send
+[HTTP requests through an SSH proxy server](https://github.com/reactphp/http#ssh-proxy).
+
+In order to send HTTP requests, you first have to add a dependency for
+[ReactPHP's async HTTP client](https://github.com/reactphp/http#client-usage).
+This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like this:
+
+```php
+$proxy = new Clue\React\SshProxy\SshSocksConnector('me@localhost:22', $loop);
+
+$connector = new React\Socket\Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => false
+));
+
+$browser = new React\Http\Browser($loop, $connector);
+
+$browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+    var_dump($response->getHeaders(), (string) $response->getBody());
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
+```
+
+We recommend using the `SshSocksConnector`, this works for both plain HTTP
 and TLS-encrypted HTTPS requests. When using the `SshProcessConnector`, this only
 works for plaintext HTTP requests.
+
+See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage)
+and any of the [examples](examples) for more details.
 
 ### Database tunnel
 
