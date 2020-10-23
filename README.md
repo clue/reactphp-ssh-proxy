@@ -24,7 +24,7 @@ existing higher-level protocol implementation.
   Send any number of SSH proxy requests in parallel and process their
   responses as soon as results come in.
   The Promise-based design provides a *sane* interface to working with out of
-  bound responses and possible connection errors.
+  order responses and possible connection errors.
 * **Standard interfaces** -
   Allows easy integration with existing higher-level components by implementing
   ReactPHP's standard
@@ -38,6 +38,7 @@ existing higher-level protocol implementation.
 
 **Table of contents**
 
+* [Support us](#support-us)
 * [Quickstart example](#quickstart-example)
 * [API](#api)
     * [SshProcessConnector](#sshprocessconnector)
@@ -54,6 +55,16 @@ existing higher-level protocol implementation.
 * [Tests](#tests)
 * [License](#license)
 * [More](#more)
+
+## Support us
+
+We invest a lot of time developing, maintaining and updating our awesome
+open-source projects. You can help us sustain this high-quality of our work by
+[becoming a sponsor on GitHub](https://github.com/sponsors/clue). Sponsors get
+numerous benefits in return, see our [sponsoring page](https://github.com/sponsors/clue)
+for details.
+
+Let's take these projects to the next level together! 🚀
 
 ## Quickstart example
 
@@ -167,7 +178,7 @@ to `tcp://reactphp.org:80` for the first time, it will run the equivalent of
 mode and will then create a SOCKS client connection to this server process. You
 can create any number of connections over this one process and it will keep this
 process running while there are any open connections and will automatically
-close if when it is idle. For this to work, you'll have to make sure that you
+close it when it is idle. For this to work, you'll have to make sure that you
 have a suitable SSH client installed. On Debian/Ubuntu-based systems, you may
 simply install it like this:
 
@@ -428,7 +439,7 @@ See also any of the [examples](examples).
 ### DNS resolution
 
 By default, neither the `SshProcessConnector` nor the `SshSocksConnector` perform
-any DNS resolution at all and simply forwards any hostname you're trying to
+any DNS resolution at all and simply forward any hostname you're trying to
 connect to the remote proxy server. The remote proxy server is thus responsible
 for looking up any hostnames via DNS (this default mode is thus called *remote DNS resolution*).
 
@@ -529,7 +540,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/reactphp-ssh-proxy:^1.1.1
+$ composer require clue/reactphp-ssh-proxy:^1.2
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
