@@ -9,27 +9,23 @@
 // history like this:
 //
 // $  export SSH_PROXY=user:secret@example.com
-// $  export MYSQL_LOGIN=user:password@localhost
-// $ php examples/21-mysql-ssh-tunnel.php
+// $ export MYSQL_LOGIN=user:password@localhost
+// $ php examples/31-mysql-ssh-tunnel.php
 //
 // See also https://github.com/friends-of-reactphp/mysql
-
-use Clue\React\SshProxy\SshProcessConnector;
-use React\MySQL\Factory;
-use React\MySQL\QueryResult;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $loop = React\EventLoop\Factory::create();
 
 $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22';
-$proxy = new SshProcessConnector($url, $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector($url, $loop);
 
 $url = getenv('MYSQL_LOGIN') !== false ? getenv('MYSQL_LOGIN') : 'user:pass@localhost';
-$factory = new Factory($loop, $proxy);
+$factory = new React\MySQL\Factory($loop, $proxy);
 $client = $factory->createLazyConnection($url);
 
-$client->query('SELECT * FROM (SELECT "foo" UNION SELECT "bar") data')->then(function (QueryResult $query) {
+$client->query('SELECT * FROM (SELECT "foo" UNION SELECT "bar") data')->then(function (React\MySQL\QueryResult $query) {
     var_dump($query->resultRows);
 }, 'printf');
 $client->quit();
