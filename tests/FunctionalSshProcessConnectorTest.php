@@ -2,7 +2,6 @@
 
 namespace Clue\Tests\React\SshProxy;
 
-use PHPUnit\Framework\TestCase;
 use React\EventLoop\Factory;
 use Clue\React\SshProxy\SshProcessConnector;
 
