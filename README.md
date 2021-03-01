@@ -1,4 +1,6 @@
-# clue/reactphp-ssh-proxy [![Build Status](https://travis-ci.org/clue/reactphp-ssh-proxy.svg?branch=master)](https://travis-ci.org/clue/reactphp-ssh-proxy)
+# clue/reactphp-ssh-proxy
+
+[![CI status](https://github.com/clue/reactphp-ssh-proxy/workflows/CI/badge.svg)](https://github.com/clue/reactphp-ssh-proxy/actions)
 
 Async SSH proxy connector and forwarder, tunnel any TCP/IP-based protocol through an SSH server,
 built on top of [ReactPHP](https://reactphp.org).
