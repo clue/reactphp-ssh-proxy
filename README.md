@@ -1,4 +1,6 @@
-# clue/reactphp-ssh-proxy [![Build Status](https://travis-ci.org/clue/reactphp-ssh-proxy.svg?branch=master)](https://travis-ci.org/clue/reactphp-ssh-proxy)
+# clue/reactphp-ssh-proxy
+
+[![CI status](https://github.com/clue/reactphp-ssh-proxy/workflows/CI/badge.svg)](https://github.com/clue/reactphp-ssh-proxy/actions)
 
 Async SSH proxy connector and forwarder, tunnel any TCP/IP-based protocol through an SSH server,
 built on top of [ReactPHP](https://reactphp.org).
@@ -546,7 +548,7 @@ $ composer require clue/reactphp-ssh-proxy:^1.2
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 
 This project aims to run on any platform and thus does not require any PHP
-extensions and supports running on legacy PHP 5.3 through current PHP 7+ and
+extensions and supports running on legacy PHP 5.3 through current PHP 8+ and
 HHVM.
 It's *highly recommended to use PHP 7+* for this project.
 
