@@ -32,9 +32,9 @@ if (getenv('SSH_PROXY') !== false) {
     $connector = new React\Socket\Connector($loop);
 }
 
-$connector->connect('tls://google.com:443')->then(function (React\Socket\ConnectionInterface $stream) {
-    $stream->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
-    $stream->on('data', function ($chunk) {
+$connector->connect('tls://google.com:443')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
+    $connection->on('data', function ($chunk) {
         echo $chunk;
     });
 }, function (Exception $e) {
