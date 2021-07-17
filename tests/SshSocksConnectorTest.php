@@ -7,6 +7,17 @@ use React\Promise\Deferred;
 
 class SshSocksConnectorTest extends TestCase
 {
+    public function testConstructWithoutLoopAssignsLoopAutomatically()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'loop');
+        $ref->setAccessible(true);
+        $loop = $ref->getValue($connector);
+
+        $this->assertInstanceOf('React\EventLoop\LoopInterface', $loop);
+    }
+
     public function testConstructorAcceptsUri()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();

@@ -75,10 +75,9 @@ The following example code demonstrates how this library can be used to send a
 plaintext HTTP request to google.com through a remote SSH server:
 
 ```php
-$loop = React\EventLoop\Factory::create();
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -92,8 +91,6 @@ $connector->connect('tcp://google.com:80')->then(function (React\Socket\Connecti
         echo '[DONE]';
     });
 }, 'printf');
-
-$loop->run();
 ```
 
 See also the [examples](examples).
@@ -121,16 +118,21 @@ systems, you may simply install it like this:
 $ sudo apt install openssh-client
 ```
 
-Its constructor simply accepts an SSH proxy server URL and a loop to bind to:
+Its constructor simply accepts an SSH proxy server URL:
 
 ```php
-$loop = React\EventLoop\Factory::create();
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
 port will be `22` for SSH, but you may have to use a custom port depending on
 your SSH server setup.
+
+This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+pass the event loop instance to use for this object. You can use a `null` value
+here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+This value SHOULD NOT be given unless you're sure you want to explicitly use a
+given event loop instance.
 
 Keep in mind that this class is implemented as a lightweight process wrapper
 around the `ssh` client binary and that it will spawn one `ssh` process for each
@@ -160,7 +162,7 @@ higher-level component:
 
 ```diff
 - $acme = new AcmeApi($connector);
-+ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
++ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 + $acme = new AcmeApi($proxy);
 ```
 
@@ -189,16 +191,21 @@ simply install it like this:
 $ sudo apt install openssh-client
 ```
 
-Its constructor simply accepts an SSH proxy server URL and a loop to bind to:
+Its constructor simply accepts an SSH proxy server URL:
 
 ```php
-$loop = React\EventLoop\Factory::create();
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
 port will be `22` for SSH, but you may have to use a custom port depending on
 your SSH server setup.
+
+This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+pass the event loop instance to use for this object. You can use a `null` value
+here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+This value SHOULD NOT be given unless you're sure you want to explicitly use a
+given event loop instance.
 
 Keep in mind that this class is implemented as a lightweight process wrapper
 around the `ssh` client binary and that it will spawn one `ssh` process for
@@ -216,7 +223,7 @@ to use multiple instances of this class to connect to different SSH proxy
 servers, you may optionally pass a unique bind address like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com?bind=127.1.1.1:1081', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com?bind=127.1.1.1:1081',);
 ```
 
 > *Security note for multi-user systems*: This class will spawn the SSH client
@@ -244,7 +251,7 @@ higher-level component:
 
 ```diff
 - $acme = new AcmeApi($connector);
-+ $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
++ $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 + $acme = new AcmeApi($proxy);
 ```
 
@@ -260,9 +267,9 @@ a streaming plain TCP/IP connection on the `SshProcessConnector` or `SshSocksCon
 and use any higher level protocol like so:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
 $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\ConnectionInterface $connection) {
     $connection->write("EHLO local\r\n");
@@ -276,11 +283,11 @@ You can either use the `SshProcessConnector` or `SshSocksConnector` directly or 
 may want to wrap this connector in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -309,9 +316,9 @@ ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector) or the
 low-level [`SecureConnector`](https://github.com/reactphp/socket#secureconnector):
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -341,14 +348,14 @@ In order to send HTTP requests, you first have to add a dependency for
 This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$browser = new React\Http\Browser($loop, $connector);
+$browser = new React\Http\Browser(null, $connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
@@ -378,11 +385,10 @@ the above SSH proxy server setup, so we can access a firewalled MySQL database
 server through an SSH tunnel. Here's the gist:
 
 ```php
-$loop = React\EventLoop\Factory::create();
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 
 $uri = 'test:test@localhost/test';
-$factory = new React\MySQL\Factory($loop, $proxy);
+$factory = new React\MySQL\Factory(null, $proxy);
 $connection = $factory->createLazyConnection($uri);
 
 $connection->query('SELECT * FROM book')->then(
@@ -395,8 +401,6 @@ $connection->query('SELECT * FROM book')->then(
 );
 
 $connection->quit();
-
-$loop->run();
 ```
 
 See also [example #21](examples) for more details.
@@ -427,11 +431,11 @@ It provides the same `connect()` method, but will automatically reject the
 underlying connection attempt if it takes too long:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false,
     'timeout' => 3.0
@@ -473,11 +477,11 @@ Given that remote DNS resolution is assumed to be the preferred mode, all
 other examples explicitly disable DNS resolution like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -486,12 +490,12 @@ $connector = new React\Socket\Connector($loop, array(
 If you want to explicitly use *local DNS resolution*, you can use the following code:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
 // set up Connector which uses Google's public DNS (8.8.8.8)
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'dns' => '8.8.8.8'
 ));
@@ -525,9 +529,9 @@ If your SSH proxy server requires password authentication, you may pass the
 username and password as part of the SSH proxy server URL like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user:pass@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector('user:pass@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user:pass@example.com', $loop);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('user:pass@example.com');
 ```
 
 For this to work, you will have to have the `sshpass` binary installed. On
@@ -545,8 +549,7 @@ $user = 'he:llo';
 $pass = 'p@ss';
 
 $proxy = new Clue\React\SshProxy\SshProcessConnector(
-    rawurlencode($user) . ':' . rawurlencode($pass) . '@example.com:2222',
-    $loop
+    rawurlencode($user) . ':' . rawurlencode($pass) . '@example.com:2222'
 );
 ```
 

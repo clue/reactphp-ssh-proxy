@@ -2,18 +2,21 @@
 
 namespace Clue\React\SshProxy;
 
+use Clue\React\Socks\Client;
 use Clue\React\SshProxy\Io\LineSeparatedReader;
-use React\EventLoop\LoopInterface;
 use React\ChildProcess\Process;
+use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Socket\ConnectorInterface;
-use Clue\React\Socks\Client;
 use React\Socket\TcpConnector;
 use React\Socket\ConnectionInterface;
 
 class SshSocksConnector implements ConnectorInterface
 {
     private $cmd;
+
+    /** @var LoopInterface */
     private $loop;
 
     private $debug = false;
@@ -36,11 +39,17 @@ class SshSocksConnector implements ConnectorInterface
      * (which may need to be installed) and this password may leak to the
      * process list if other users have access to your system.
      *
+     * This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+     * pass the event loop instance to use for this object. You can use a `null` value
+     * here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+     * This value SHOULD NOT be given unless you're sure you want to explicitly use a
+     * given event loop instance.
+     *
      * @param string $uri
-     * @param LoopInterface $loop
+     * @param ?LoopInterface $loop
      * @throws \InvalidArgumentException
      */
-    public function __construct($uri, LoopInterface $loop)
+    public function __construct($uri, LoopInterface $loop = null)
     {
         // URI must use optional ssh:// scheme, must contain host and neither pass nor target must start with dash
         $parts = \parse_url((\strpos($uri, '://') === false ? 'ssh://' : '') . $uri);
@@ -75,9 +84,9 @@ class SshSocksConnector implements ConnectorInterface
             $this->bind = $args['bind'];
         }
 
-        $this->socks = new Client('socks4://' . $this->bind, new TcpConnector($loop));
+        $this->loop = $loop ?: Loop::get();
+        $this->socks = new Client('socks4://' . $this->bind, new TcpConnector($this->loop));
         $this->cmd .= '-D ' . \escapeshellarg($this->bind) . ' ' . \escapeshellarg($target);
-        $this->loop = $loop;
     }
 
     public function connect($uri)

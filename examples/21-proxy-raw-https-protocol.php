@@ -16,10 +16,9 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22';
 
-$loop = React\EventLoop\Factory::create();
+$proxy = new Clue\React\SshProxy\SshSocksConnector($url);
 
-$proxy = new Clue\React\SshProxy\SshSocksConnector($url, $loop);
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
@@ -33,5 +32,3 @@ $connector->connect('tls://google.com:443')->then(function (React\Socket\Connect
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
-
-$loop->run();

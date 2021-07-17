@@ -6,6 +6,17 @@ use Clue\React\SshProxy\SshProcessConnector;
 
 class SshProcessConnectorTest extends TestCase
 {
+    public function testConstructWithoutLoopAssignsLoopAutomatically()
+    {
+        $connector = new SshProcessConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'loop');
+        $ref->setAccessible(true);
+        $loop = $ref->getValue($connector);
+
+        $this->assertInstanceOf('React\EventLoop\LoopInterface', $loop);
+    }
+
     public function testConstructorAcceptsUri()
     {
         $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();

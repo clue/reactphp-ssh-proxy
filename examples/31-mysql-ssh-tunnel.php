@@ -16,18 +16,15 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
 $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22';
-$proxy = new Clue\React\SshProxy\SshProcessConnector($url, $loop);
+$proxy = new Clue\React\SshProxy\SshProcessConnector($url);
 
 $url = getenv('MYSQL_LOGIN') !== false ? getenv('MYSQL_LOGIN') : 'user:pass@localhost';
-$factory = new React\MySQL\Factory($loop, $proxy);
+$factory = new React\MySQL\Factory(null, $proxy);
 $client = $factory->createLazyConnection($url);
 
 $client->query('SELECT * FROM (SELECT "foo" UNION SELECT "bar") data')->then(function (React\MySQL\QueryResult $query) {
     var_dump($query->resultRows);
 }, 'printf');
-$client->quit();
 
-$loop->run();
+$client->quit();
