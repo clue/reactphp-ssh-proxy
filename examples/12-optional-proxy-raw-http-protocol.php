@@ -18,18 +18,17 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
 // SSH_PROXY environment given? use this as the proxy URL
 if (getenv('SSH_PROXY') !== false) {
-    $proxy = new Clue\React\SshProxy\SshProcessConnector(getenv('SSH_PROXY'), $loop);
-    $connector = new React\Socket\Connector($loop, array(
+    $proxy = new Clue\React\SshProxy\SshProcessConnector(getenv('SSH_PROXY'));
+
+    $connector = new React\Socket\Connector(null, array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false
     ));
 } else {
-    $connector = new React\Socket\Connector($loop);
+    $connector = new React\Socket\Connector();
 }
 
 $connector->connect('tcp://google.com:80')->then(function (React\Socket\ConnectionInterface $connection) {
@@ -40,5 +39,3 @@ $connector->connect('tcp://google.com:80')->then(function (React\Socket\Connecti
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
-
-$loop->run();
