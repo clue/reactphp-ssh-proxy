@@ -2,14 +2,13 @@
 
 namespace Clue\Tests\React\SshProxy;
 
-use React\EventLoop\Factory;
 use Clue\React\SshProxy\SshProcessConnector;
+use React\EventLoop\Loop;
 
 class FunctionalSshProcessConnectorTest extends TestCase
 {
     const TIMEOUT = 10.0;
 
-    private $loop;
     private $connector;
 
     /**
@@ -22,17 +21,16 @@ class FunctionalSshProcessConnectorTest extends TestCase
             $this->markTestSkipped('No SSH_PROXY env set');
         }
 
-        $this->loop = Factory::create();
-        $this->connector = new SshProcessConnector($url, $this->loop);
+        $this->connector = new SshProcessConnector($url);
     }
 
     public function testConnectInvalidProxyUriWillReturnRejectedPromise()
     {
-        $this->connector = new SshProcessConnector(getenv('SSH_PROXY') . '.invalid', $this->loop);
+        $this->connector = new SshProcessConnector(getenv('SSH_PROXY') . '.invalid');
         $promise = $this->connector->connect('example.com:80');
 
         $this->setExpectedException('RuntimeException', 'Connection to example.com:80 failed because SSH client died');
-        \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
+        \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
     }
 
     public function testConnectInvalidTargetWillReturnRejectedPromise()
@@ -40,7 +38,7 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $promise = $this->connector->connect('example.invalid:80');
 
         $this->setExpectedException('RuntimeException', 'Connection to example.invalid:80 rejected:');
-        \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
+        \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
     }
 
     public function testCancelConnectWillReturnRejectedPromise()
@@ -49,14 +47,14 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $promise->cancel();
 
         $this->setExpectedException('RuntimeException', 'Connection to example.com:80 cancelled while waiting for SSH client');
-        \Clue\React\Block\await($promise, $this->loop, 0);
+        \Clue\React\Block\await($promise, Loop::get(), 0);
     }
 
     public function testConnectValidTargetWillReturnPromiseWhichResolvesToConnection()
     {
         $promise = $this->connector->connect('example.com:80');
 
-        $connection = \Clue\React\Block\await($promise, $this->loop, self::TIMEOUT);
+        $connection = \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
 
         $this->assertInstanceOf('React\Socket\ConnectionInterface', $connection);
         $this->assertTrue($connection->isReadable());

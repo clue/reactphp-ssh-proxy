@@ -77,7 +77,7 @@ plaintext HTTP request to google.com through a remote SSH server:
 ```php
 $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -287,7 +287,7 @@ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -318,7 +318,7 @@ low-level [`SecureConnector`](https://github.com/reactphp/socket#secureconnector
 ```php
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -350,12 +350,12 @@ This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like th
 ```php
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$browser = new React\Http\Browser(null, $connector);
+$browser = new React\Http\Browser($connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
@@ -435,7 +435,7 @@ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false,
     'timeout' => 3.0
@@ -481,7 +481,7 @@ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 // or
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -495,7 +495,7 @@ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
 $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
 
 // set up Connector which uses Google's public DNS (8.8.8.8)
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => '8.8.8.8'
 ));
