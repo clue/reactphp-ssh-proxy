@@ -1,7 +1,7 @@
 # clue/reactphp-ssh-proxy
 
 [![CI status](https://github.com/clue/reactphp-ssh-proxy/workflows/CI/badge.svg)](https://github.com/clue/reactphp-ssh-proxy/actions)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/clue/reactphp-ssh-proxy?color=blue)](https://packagist.org/packages/clue/reactphp-ssh-proxy)
+[![installs on Packagist](https://img.shields.io/packagist/dt/clue/reactphp-ssh-proxy?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/clue/reactphp-ssh-proxy)
 
 Async SSH proxy connector and forwarder, tunnel any TCP/IP-based protocol through an SSH server,
 built on top of [ReactPHP](https://reactphp.org/).
@@ -72,7 +72,7 @@ Let's take these projects to the next level together! 🚀
 ## Quickstart example
 
 The following example code demonstrates how this library can be used to send a
-plaintext HTTP request to google.com through a remote SSH server:
+secure HTTPS request to google.com through a remote SSH server:
 
 ```php
 <?php
@@ -88,7 +88,7 @@ $connector = new React\Socket\Connector(array(
 
 $browser = new React\Http\Browser($connector);
 
-$browser->get('http://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+$browser->get('https://google.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
@@ -358,7 +358,7 @@ $connector = new React\Socket\Connector(array(
 
 $browser = new React\Http\Browser($connector);
 
-$browser->get('http://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+$browser->get('https://google.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
@@ -568,7 +568,7 @@ See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 This project aims to run on any platform and thus does not require any PHP
 extensions and supports running on legacy PHP 5.3 through current PHP 8+ and
 HHVM.
-It's *highly recommended to use PHP 7+* for this project.
+It's *highly recommended to use the latest supported PHP version* for this project.
 
 This project is implemented as a lightweight process wrapper around the `ssh`
 client binary, so you'll have to make sure that you have a suitable SSH client
@@ -586,7 +586,7 @@ Debian/Ubuntu-based systems, you may simply install it like this:
 $ sudo apt install sshpass
 ```
 
-*Running on [Windows is currently not supported](https://github.com/reactphp/child-process/issues/9)*
+*Running on [Windows is currently not supported](https://github.com/clue/reactphp-ssh-proxy/issues/12)*
 
 ## Tests
 
