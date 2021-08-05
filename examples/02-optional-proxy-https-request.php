@@ -16,14 +16,14 @@ $connector = null;
 if (getenv('SSH_PROXY') !== false) {
     $proxy = new Clue\React\SshProxy\SshProcessConnector(getenv('SSH_PROXY'));
 
-    $connector = new React\Socket\Connector(null, array(
+    $connector = new React\Socket\Connector(array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false
     ));
 }
 
-$browser = new React\Http\Browser(null, $connector);
+$browser = new React\Http\Browser($connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());

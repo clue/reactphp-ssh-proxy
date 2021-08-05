@@ -3,15 +3,14 @@
 namespace Clue\Tests\React\SshProxy;
 
 use Clue\React\SshProxy\SshProcessConnector;
-use React\EventLoop\Factory;
+use React\EventLoop\Loop;
 use React\Socket\ConnectionInterface;
 
 class IntegrationSshProcessConnectorTest extends TestCase
 {
     public function testConnectWillResolveWithConnectionInterfaceWhenProcessOutputsChannelOpenConfirmMessage()
     {
-        $loop = Factory::create();
-        $connector = new SshProcessConnector('host', $loop);
+        $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
@@ -20,13 +19,12 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $promise = $connector->connect('example.com:80');
         $promise->then($this->expectCallableOnceWith($this->isInstanceOf('React\Socket\ConnectionInterface')));
 
-        $loop->run();
+        Loop::run();
     }
 
     public function testConnectWillRejectWithExceptionWhenProcessOutputsChannelOpenFailedMessage()
     {
-        $loop = Factory::create();
-        $connector = new SshProcessConnector('host', $loop);
+        $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
@@ -35,13 +33,12 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $promise = $connector->connect('example.com:80');
         $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
 
-        $loop->run();
+        Loop::run();
     }
 
     public function testConnectWillRejectWithExceptionWhenProcessOutputsEndsWithoutChannelMessage()
     {
-        $loop = Factory::create();
-        $connector = new SshProcessConnector('host', $loop);
+        $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
@@ -50,13 +47,12 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $promise = $connector->connect('example.com:80');
         $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
 
-        $loop->run();
+        Loop::run();
     }
 
     public function testConnectWillResolveWithConnectionThatWillEmitImmediateDataFromProcessStdoutAfterChannelOpenConfirmMessage()
     {
-        $loop = Factory::create();
-        $connector = new SshProcessConnector('host', $loop);
+        $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
         $ref->setAccessible(true);
@@ -69,6 +65,6 @@ class IntegrationSshProcessConnectorTest extends TestCase
             $connection->on('data', $data);
         });
 
-        $loop->run();
+        Loop::run();
     }
 }

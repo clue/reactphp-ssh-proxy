@@ -22,7 +22,7 @@ require __DIR__ . '/../vendor/autoload.php';
 if (getenv('SSH_PROXY') !== false) {
     $proxy = new Clue\React\SshProxy\SshProcessConnector(getenv('SSH_PROXY'));
 
-    $connector = new React\Socket\Connector(null, array(
+    $connector = new React\Socket\Connector(array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false

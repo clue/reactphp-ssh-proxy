@@ -18,7 +18,7 @@ $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22
 
 $proxy = new Clue\React\SshProxy\SshProcessConnector($url);
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
