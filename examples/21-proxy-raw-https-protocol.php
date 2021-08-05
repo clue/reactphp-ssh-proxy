@@ -6,7 +6,7 @@
 // You can assign the SSH_PROXY environment and prefix this with a space to make
 // sure your login credentials are not stored in your bash history like this:
 //
-// $  export SSH_PROXY=user:secret@example.com
+// $  export SSH_PROXY=alice:password@example.com
 // $ php examples/21-proxy-raw-https-protocol.php
 //
 // For illustration purposes only. If you want to send HTTP requests in a real
@@ -14,7 +14,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22';
+$url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'alice@localhost';
 
 $proxy = new Clue\React\SshProxy\SshSocksConnector($url);
 

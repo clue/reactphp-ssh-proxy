@@ -4,7 +4,7 @@
 [![Packagist Downloads](https://img.shields.io/packagist/dt/clue/reactphp-ssh-proxy?color=blue)](https://packagist.org/packages/clue/reactphp-ssh-proxy)
 
 Async SSH proxy connector and forwarder, tunnel any TCP/IP-based protocol through an SSH server,
-built on top of [ReactPHP](https://reactphp.org).
+built on top of [ReactPHP](https://reactphp.org/).
 
 [Secure Shell (SSH)](https://en.wikipedia.org/wiki/Secure_Shell) is a secure
 network protocol that is most commonly used to access a login shell on a remote
@@ -75,22 +75,24 @@ The following example code demonstrates how this library can be used to send a
 plaintext HTTP request to google.com through a remote SSH server:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$connector->connect('tcp://google.com:80')->then(function (React\Socket\ConnectionInterface $connection) {
-    $connection->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
-    $connection->on('data', function ($chunk) {
-        echo $chunk;
-    });
-    $connection->on('close', function () {
-        echo '[DONE]';
-    });
-}, 'printf');
+$browser = new React\Http\Browser($connector);
+
+$browser->get('http://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+    var_dump($response->getHeaders(), (string) $response->getBody());
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 See also the [examples](examples).
@@ -109,7 +111,7 @@ any destination by using an intermediary SSH server as a proxy server.
 This class is implemented as a lightweight process wrapper around the `ssh`
 client binary, so it will spawn one `ssh` process for each connection. For
 example, if you [open a connection](#plain-tcp-connections) to
-`tcp://reactphp.org:80`, it will run the equivalent of `ssh -W reactphp.org:80 user@example.com`
+`tcp://reactphp.org:80`, it will run the equivalent of `ssh -W reactphp.org:80 alice@example.com`
 and forward data from its standard I/O streams. For this to work, you'll have to
 make sure that you have a suitable SSH client installed. On Debian/Ubuntu-based
 systems, you may simply install it like this:
@@ -121,7 +123,7 @@ $ sudo apt install openssh-client
 Its constructor simply accepts an SSH proxy server URL:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
@@ -162,7 +164,7 @@ higher-level component:
 
 ```diff
 - $acme = new AcmeApi($connector);
-+ $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
++ $proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 + $acme = new AcmeApi($proxy);
 ```
 
@@ -179,7 +181,7 @@ This class is implemented as a lightweight process wrapper around the `ssh`
 client binary and it will spawn one `ssh` process on demand for multiple
 connections. For example, once you [open a connection](#plain-tcp-connections)
 to `tcp://reactphp.org:80` for the first time, it will run the equivalent of
-`ssh -D 1080 user@example.com` to run the SSH client in local SOCKS proxy server
+`ssh -D 1080 alice@example.com` to run the SSH client in local SOCKS proxy server
 mode and will then create a SOCKS client connection to this server process. You
 can create any number of connections over this one process and it will keep this
 process running while there are any open connections and will automatically
@@ -194,7 +196,7 @@ $ sudo apt install openssh-client
 Its constructor simply accepts an SSH proxy server URL:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
@@ -223,7 +225,7 @@ to use multiple instances of this class to connect to different SSH proxy
 servers, you may optionally pass a unique bind address like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com?bind=127.1.1.1:1081',);
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com?bind=127.1.1.1:1081');
 ```
 
 > *Security note for multi-user systems*: This class will spawn the SSH client
@@ -251,7 +253,7 @@ higher-level component:
 
 ```diff
 - $acme = new AcmeApi($connector);
-+ $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
++ $proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 + $acme = new AcmeApi($proxy);
 ```
 
@@ -267,9 +269,9 @@ a streaming plain TCP/IP connection on the `SshProcessConnector` or `SshSocksCon
 and use any higher level protocol like so:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\ConnectionInterface $connection) {
     $connection->write("EHLO local\r\n");
@@ -283,9 +285,9 @@ You can either use the `SshProcessConnector` or `SshSocksConnector` directly or 
 may want to wrap this connector in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -312,11 +314,10 @@ details.
 The `SshSocksConnector` can also be used if you want to establish a secure TLS connection
 (formerly known as SSL) between you and your destination, such as when using
 secure HTTPS to your destination site. You can simply wrap this connector in
-ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector) or the
-low-level [`SecureConnector`](https://github.com/reactphp/socket#secureconnector):
+ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -348,7 +349,7 @@ In order to send HTTP requests, you first have to add a dependency for
 This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -357,7 +358,7 @@ $connector = new React\Socket\Connector(array(
 
 $browser = new React\Http\Browser($connector);
 
-$browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+$browser->get('http://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
@@ -385,7 +386,7 @@ the above SSH proxy server setup, so we can access a firewalled MySQL database
 server through an SSH tunnel. Here's the gist:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 
 $uri = 'test:test@localhost/test';
 $factory = new React\MySQL\Factory(null, $proxy);
@@ -424,16 +425,14 @@ Many use cases require more control over the timeout and likely values much
 smaller, usually in the range of a few seconds only.
 
 You can use ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector)
-or the low-level
-[`TimeoutConnector`](https://github.com/reactphp/socket#timeoutconnector)
 to decorate any given `ConnectorInterface` instance.
 It provides the same `connect()` method, but will automatically reject the
 underlying connection attempt if it takes too long:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -477,9 +476,9 @@ Given that remote DNS resolution is assumed to be the preferred mode, all
 other examples explicitly disable DNS resolution like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -490,9 +489,9 @@ $connector = new React\Socket\Connector(array(
 If you want to explicitly use *local DNS resolution*, you can use the following code:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 // set up Connector which uses Google's public DNS (8.8.8.8)
 $connector = new React\Socket\Connector(array(
@@ -512,7 +511,7 @@ can access your SSH proxy server on the command line like this:
 
 ```bash
 # test SSH access
-$ ssh user@example.com echo hello
+$ ssh alice@example.com echo hello
 ```
 
 Because this class is designed to be used to create any number of connections,
@@ -529,9 +528,9 @@ If your SSH proxy server requires password authentication, you may pass the
 username and password as part of the SSH proxy server URL like this:
 
 ```php
-$proxy = new Clue\React\SshProxy\SshProcessConnector('user:pass@example.com');
+$proxy = new Clue\React\SshProxy\SshProcessConnector('alice:password@example.com');
 // or
-$proxy = new Clue\React\SshProxy\SshSocksConnector('user:pass@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice:password@example.com');
 ```
 
 For this to work, you will have to have the `sshpass` binary installed. On
@@ -547,15 +546,14 @@ special characters:
 ```php
 $user = 'he:llo';
 $pass = 'p@ss';
+$url = rawurlencode($user) . ':' . rawurlencode($pass) . '@example.com';
 
-$proxy = new Clue\React\SshProxy\SshProcessConnector(
-    rawurlencode($user) . ':' . rawurlencode($pass) . '@example.com:2222'
-);
+$proxy = new Clue\React\SshProxy\SshProcessConnector($url);
 ```
 
 ## Install
 
-The recommended way to install this library is [through Composer](https://getcomposer.org).
+The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
 This project follows [SemVer](https://semver.org/).
@@ -593,7 +591,7 @@ $ sudo apt install sshpass
 ## Tests
 
 To run the test suite, you first need to clone this repo and then install all
-dependencies [through Composer](https://getcomposer.org):
+dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
 $ composer install
@@ -602,7 +600,7 @@ $ composer install
 To run the test suite, go to the project root and run:
 
 ```bash
-$ php vendor/bin/phpunit
+$ vendor/bin/phpunit
 ```
 
 The test suite contains a number of tests that require an actual SSH proxy server.
@@ -612,8 +610,8 @@ environment and prefix this with a space to make sure your login credentials are
 not stored in your bash history like this:
 
 ```bash
-$  export SSH_PROXY=user:secret@example.com
-$ php vendor/bin/phpunit --exclude-group internet
+$  export SSH_PROXY=alice:password@example.com
+$ vendor/bin/phpunit
 ```
 
 ## License

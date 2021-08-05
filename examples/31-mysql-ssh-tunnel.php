@@ -8,7 +8,7 @@
 // a space to make sure your login credentials are not stored in your bash
 // history like this:
 //
-// $  export SSH_PROXY=user:secret@example.com
+// $  export SSH_PROXY=alice:password@example.com
 // $ export MYSQL_LOGIN=user:password@localhost
 // $ php examples/31-mysql-ssh-tunnel.php
 //
@@ -16,7 +16,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'ssh://localhost:22';
+$url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'alice@localhost';
 $proxy = new Clue\React\SshProxy\SshProcessConnector($url);
 
 $url = getenv('MYSQL_LOGIN') !== false ? getenv('MYSQL_LOGIN') : 'user:pass@localhost';
@@ -25,6 +25,8 @@ $client = $factory->createLazyConnection($url);
 
 $client->query('SELECT * FROM (SELECT "foo" UNION SELECT "bar") data')->then(function (React\MySQL\QueryResult $query) {
     var_dump($query->resultRows);
-}, 'printf');
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 
 $client->quit();

@@ -6,7 +6,7 @@
 // You can assign the SSH_PROXY environment and prefix this with a space to make
 // sure your login credentials are not stored in your bash history like this:
 //
-// $  export SSH_PROXY=user:secret@example.com
+// $  export SSH_PROXY=alice:password@example.com
 // $ php examples/22-optional-proxy-raw-https-protocol.php
 //
 // This example highlights how changing from direct connection to using a proxy

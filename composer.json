@@ -7,16 +7,9 @@
     "authors": [
         {
             "name": "Christian Lück",
-            "email": "christian@lueck.tv"
+            "email": "christian@clue.engineering"
         }
     ],
-    "autoload": {
-        "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
-        "files": [ "src/Io/functions.php" ]
-    },
-    "autoload-dev": {
-        "psr-4": { "Clue\\Tests\\React\\SshProxy\\": "tests/"} 
-    },
     "require": {
         "php": ">=5.3",
         "clue/socks-react": "^1.0",
@@ -31,5 +24,12 @@
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.36",
         "react/http": "^1.5",
         "react/mysql": "^0.5.5"
+    },
+    "autoload": {
+        "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
+        "files": [ "src/Io/functions.php" ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Clue\\Tests\\React\\SshProxy\\": "tests/"} 
     }
 }
