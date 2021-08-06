@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.3.0 (2021-08-06)
+
+*   Feature: Simplify usage by supporting new default loop.
+    (#27 and #28 by @clue)
+
+    ```php
+    // old (still supported)
+    $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com', $loop);
+    $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com', $loop);
+
+    // new (using default loop)
+    $proxy = new Clue\React\SshProxy\SshProcessConnector('user@example.com');
+    $proxy = new Clue\React\SshProxy\SshSocksConnector('user@example.com');
+    ```
+
+*   Documentation improvements and updated examples.
+    (#25, #29 and #30 by @clue and #23 and #26 by @SimonFrings)
+
+*   Improve test suite and use GitHub actions for continuous integration (CI).
+    (#24 by @SimonFrings)
+
 ## 1.2.0 (2020-10-23)
 
 *   Fix: Fix error reporting when parsing invalid SSH server URL.
