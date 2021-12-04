@@ -78,7 +78,7 @@ class SshSocksConnector implements ConnectorInterface
         \parse_str(parse_url($uri, \PHP_URL_QUERY), $args);
         if (isset($args['bind'])) {
             $parts = parse_url('tcp://' . $args['bind']);
-            if (!isset($parts['scheme'], $parts['host'], $parts['port']) || \filter_var(\trim($parts['host'], '[]'), \FILTER_VALIDATE_IP) === false) {
+            if (!isset($parts['scheme'], $parts['host'], $parts['port']) || @\inet_pton(\trim($parts['host'], '[]')) === false) {
                 throw new \InvalidArgumentException('Invalid bind address given');
             }
             $this->bind = $args['bind'];
