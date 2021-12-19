@@ -75,7 +75,7 @@ class SshSocksConnector implements ConnectorInterface
         }
 
         $args = array();
-        \parse_str(parse_url($uri, \PHP_URL_QUERY), $args);
+        \parse_str((string) parse_url($uri, \PHP_URL_QUERY), $args);
         if (isset($args['bind'])) {
             $parts = parse_url('tcp://' . $args['bind']);
             if (!isset($parts['scheme'], $parts['host'], $parts['port']) || @\inet_pton(\trim($parts['host'], '[]')) === false) {
