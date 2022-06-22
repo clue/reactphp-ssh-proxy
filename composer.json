@@ -12,17 +12,18 @@
     ],
     "require": {
         "php": ">=5.3",
-        "clue/socks-react": "dev-promise-v3 as 1.4.0",
+        "clue/socks-react": "^1.4",
         "react/child-process": "^0.6",
         "react/event-loop": "^1.2",
-        "react/promise": "^3@dev || ^2.1 || ^1.2.1",
-        "react/socket": "dev-promise-3 as 1.12.0",
+        "react/promise": "^3 || ^2.1 || ^1.2.1",
+        "react/socket": "^1.12.0",
         "react/stream": "^1.2"
     },
     "require-dev": {
         "clue/block-react": "^1.5",
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.36",
-        "react/mysql": "dev-promise-v3 as 0.5.7"
+        "react/http": "^1.5",
+        "react/mysql": "^0.5.5"
     },
     "autoload": {
         "psr-4": { "Clue\\React\\SshProxy\\": "src/" },
@@ -30,19 +31,5 @@
     },
     "autoload-dev": {
         "psr-4": { "Clue\\Tests\\React\\SshProxy\\": "tests/"} 
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/WyriHaximus-labs/socket"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/clue-labs/reactphp-socks"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/clue-labs/mysql"
-        }
-    ]
+    }
 }
