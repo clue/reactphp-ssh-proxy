@@ -1,6 +1,6 @@
 # clue/reactphp-ssh-proxy
 
-[![CI status](https://github.com/clue/reactphp-ssh-proxy/workflows/CI/badge.svg)](https://github.com/clue/reactphp-ssh-proxy/actions)
+[![CI status](https://github.com/clue/reactphp-ssh-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/clue/reactphp-ssh-proxy/actions)
 [![installs on Packagist](https://img.shields.io/packagist/dt/clue/reactphp-ssh-proxy?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/clue/reactphp-ssh-proxy)
 
 Async SSH proxy connector and forwarder, tunnel any TCP/IP-based protocol through an SSH server,
