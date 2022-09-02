@@ -3,7 +3,6 @@
 namespace Clue\Tests\React\SshProxy;
 
 use Clue\React\SshProxy\SshProcessConnector;
-use React\EventLoop\Loop;
 
 class FunctionalSshProcessConnectorTest extends TestCase
 {
@@ -30,7 +29,7 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $promise = $this->connector->connect('example.com:80');
 
         $this->setExpectedException('RuntimeException', 'Connection to example.com:80 failed because SSH client died');
-        \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, self::TIMEOUT));
     }
 
     public function testConnectInvalidTargetWillReturnRejectedPromise()
@@ -38,7 +37,7 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $promise = $this->connector->connect('example.invalid:80');
 
         $this->setExpectedException('RuntimeException', 'Connection to example.invalid:80 rejected:');
-        \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, self::TIMEOUT));
     }
 
     public function testCancelConnectWillReturnRejectedPromise()
@@ -47,14 +46,14 @@ class FunctionalSshProcessConnectorTest extends TestCase
         $promise->cancel();
 
         $this->setExpectedException('RuntimeException', 'Connection to example.com:80 cancelled while waiting for SSH client');
-        \Clue\React\Block\await($promise, Loop::get(), 0);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, 0));
     }
 
     public function testConnectValidTargetWillReturnPromiseWhichResolvesToConnection()
     {
         $promise = $this->connector->connect('example.com:80');
 
-        $connection = \Clue\React\Block\await($promise, Loop::get(), self::TIMEOUT);
+        $connection = \React\Async\await(\React\Promise\Timer\timeout($promise, self::TIMEOUT));
 
         $this->assertInstanceOf('React\Socket\ConnectionInterface', $connection);
         $this->assertTrue($connection->isReadable());
