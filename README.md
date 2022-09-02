@@ -117,7 +117,7 @@ make sure that you have a suitable SSH client installed. On Debian/Ubuntu-based
 systems, you may simply install it like this:
 
 ```bash
-$ sudo apt install openssh-client
+sudo apt install openssh-client
 ```
 
 Its constructor simply accepts an SSH proxy server URL:
@@ -190,7 +190,7 @@ have a suitable SSH client installed. On Debian/Ubuntu-based systems, you may
 simply install it like this:
 
 ```bash
-$ sudo apt install openssh-client
+sudo apt install openssh-client
 ```
 
 Its constructor simply accepts an SSH proxy server URL:
@@ -511,7 +511,7 @@ can access your SSH proxy server on the command line like this:
 
 ```bash
 # test SSH access
-$ ssh alice@example.com echo hello
+ssh alice@example.com echo hello
 ```
 
 Because this class is designed to be used to create any number of connections,
@@ -537,7 +537,7 @@ For this to work, you will have to have the `sshpass` binary installed. On
 Debian/Ubuntu-based systems, you may simply install it like this:
 
 ```bash
-$ sudo apt install sshpass
+sudo apt install sshpass
 ```
 
 Note that both the username and password must be percent-encoded if they contain
@@ -560,7 +560,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/reactphp-ssh-proxy:^1.3
+composer require clue/reactphp-ssh-proxy:^1.4
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -575,7 +575,7 @@ client binary, so you'll have to make sure that you have a suitable SSH client
 installed. On Debian/Ubuntu-based systems, you may simply install it like this:
 
 ```bash
-$ sudo apt install openssh-client
+sudo apt install openssh-client
 ```
 
 Additionally, if you use [password authentication](#password-authentication)
@@ -583,7 +583,7 @@ Additionally, if you use [password authentication](#password-authentication)
 Debian/Ubuntu-based systems, you may simply install it like this:
 
 ```bash
-$ sudo apt install sshpass
+sudo apt install sshpass
 ```
 
 *Running on [Windows is currently not supported](https://github.com/clue/reactphp-ssh-proxy/issues/12)*
@@ -594,13 +594,13 @@ To run the test suite, you first need to clone this repo and then install all
 dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
-$ composer install
+composer install
 ```
 
 To run the test suite, go to the project root and run:
 
 ```bash
-$ vendor/bin/phpunit
+vendor/bin/phpunit
 ```
 
 The test suite contains a number of tests that require an actual SSH proxy server.
@@ -610,8 +610,8 @@ environment and prefix this with a space to make sure your login credentials are
 not stored in your bash history like this:
 
 ```bash
-$  export SSH_PROXY=alice:password@example.com
-$ vendor/bin/phpunit
+ export SSH_PROXY=alice:password@example.com
+vendor/bin/phpunit
 ```
 
 ## License

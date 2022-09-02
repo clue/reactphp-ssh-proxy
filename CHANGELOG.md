@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.4.0 (2022-09-02)
+
+*   Feature: Full support for PHP 8.1 and PHP 8.2.
+    (#32 by @clue and #37 by @SimonFrings)
+
+*   Feature: Mark passwords and URIs as `#[\SensitiveParameter]` (PHP 8.2+).
+    (#38 by @SimonFrings)
+
+*   Feature: Forward compatibility with upcoming Promise v3.
+    (#35 by @clue)
+
+*   Feature: Avoid dependency on `ext-filter`.
+    (#31 by @clue)
+
+*   Improve test suite and use new reactphp/async package instead of clue/reactphp-block.
+    (#36 and #39 by @SimonFrings)
+
 ## 1.3.0 (2021-08-06)
 
 *   Feature: Simplify usage by supporting new default loop.
