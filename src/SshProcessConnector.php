@@ -38,8 +38,11 @@ class SshProcessConnector implements ConnectorInterface
      * @param ?LoopInterface $loop
      * @throws \InvalidArgumentException
      */
-    public function __construct($uri, LoopInterface $loop = null)
-    {
+    public function __construct(
+        #[\SensitiveParameter]
+        $uri,
+        LoopInterface $loop = null
+    ) {
         // URI must use optional ssh:// scheme, must contain host and neither pass nor target must start with dash
         $parts = \parse_url((\strpos($uri, '://') === false ? 'ssh://' : '') . $uri);
         $pass = isset($parts['pass']) ? \rawurldecode($parts['pass']) : null;
