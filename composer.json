@@ -12,15 +12,15 @@
     ],
     "require": {
         "php": ">=5.3",
-        "clue/socks-react": "^1.0",
+        "clue/socks-react": "^1.4",
         "react/child-process": "^0.6",
         "react/event-loop": "^1.2",
-        "react/promise": "^2.1 || ^1.2.1",
-        "react/socket": "^1.9",
+        "react/promise": "^3 || ^2.1 || ^1.2.1",
+        "react/socket": "^1.12.0",
         "react/stream": "^1.2"
     },
     "require-dev": {
-        "clue/block-react": "^1.3",
+        "clue/block-react": "^1.5",
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.36",
         "react/http": "^1.5",
         "react/mysql": "^0.5.5"
