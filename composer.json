@@ -20,8 +20,8 @@
         "react/stream": "^1.2"
     },
     "require-dev": {
-        "clue/block-react": "^1.5",
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.36",
+        "react/async": "^4 || ^3 || ^2",
         "react/http": "^1.5",
         "react/mysql": "^0.5.5"
     },
