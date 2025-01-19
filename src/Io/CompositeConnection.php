@@ -73,7 +73,6 @@ class CompositeConnection extends EventEmitter implements ConnectionInterface
             return;
         }
 
-        $this->remote = null;
         $this->closed = true;
         $this->read->close();
         $this->write->close();
