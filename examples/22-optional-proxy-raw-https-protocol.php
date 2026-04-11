@@ -20,7 +20,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // SSH_PROXY environment given? use this as the proxy URL
 if (getenv('SSH_PROXY') !== false) {
-    $proxy = new Clue\React\SshProxy\SshProcessConnector(getenv('SSH_PROXY'));
+    $proxy = new Clue\React\SshProxy\SshSocksConnector(getenv('SSH_PROXY'));
 
     $connector = new React\Socket\Connector(array(
         'tcp' => $proxy,
