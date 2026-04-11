@@ -237,7 +237,8 @@ class SshSocksConnector implements ConnectorInterface
             // match everything related to our forwarding channel
             // forwarding success will only be reported to stderr via debug1 / -v
             // debug1: channel 0: new [port listener]
-            if (\preg_match('/^(?:debug\d\: )channel \d: new \[port listener\]$/', $line)) {
+            // debug1: channel 0: new port-listener [port listener] (inactive timeout: 0)
+            if (\preg_match('/^(?:debug\d\: )channel \d: new(?: port-listener)? \[port listener\](?: \([^()]*\))?$/', $line)) {
                 $deferred->resolve($process);
             }
         });
