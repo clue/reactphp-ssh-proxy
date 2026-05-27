@@ -52,7 +52,7 @@ class SshSocksConnector implements ConnectorInterface
     public function __construct(
         #[\SensitiveParameter]
         $uri,
-        LoopInterface $loop = null
+        $loop = null
     ) {
         // URI must use optional ssh:// scheme, must contain host and neither pass nor target must start with dash
         $parts = \parse_url((\strpos($uri, '://') === false ? 'ssh://' : '') . $uri);
@@ -60,6 +60,10 @@ class SshSocksConnector implements ConnectorInterface
         $target = (isset($parts['user']) ? \rawurldecode($parts['user']) . '@' : '') . (isset($parts['host']) ? $parts['host'] : '');
         if (!isset($parts['scheme'], $parts['host']) || $parts['scheme'] !== 'ssh' || (isset($pass[0]) && $pass[0] === '-') || $target[0] === '-') {
             throw new \InvalidArgumentException('Invalid SSH server URI');
+        }
+
+        if ($loop !== null && !$loop instanceof LoopInterface) { // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|React\EventLoop\LoopInterface');
         }
 
         $this->cmd = 'exec ';

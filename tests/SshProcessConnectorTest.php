@@ -93,6 +93,12 @@ class SshProcessConnectorTest extends TestCase
         new SshProcessConnector('-host', $loop);
     }
 
+    public function testConstructorThrowsForInvalidLoop()
+    {
+        $this->setExpectedException('InvalidArgumentException', 'Argument #2 ($loop) expected null|React\EventLoop\LoopInterface');
+        new SshProcessConnector('host', 'loop');
+    }
+
     /**
      * @doesNotPerformAssertions
      */
