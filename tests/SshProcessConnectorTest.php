@@ -11,7 +11,9 @@ class SshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'loop');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $loop = $ref->getValue($connector);
 
         $this->assertInstanceOf('React\EventLoop\LoopInterface', $loop);
@@ -23,7 +25,9 @@ class SshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes \'host\'', $ref->getValue($connector));
     }
@@ -34,7 +38,9 @@ class SshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host:22', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes \'host\'', $ref->getValue($connector));
     }
@@ -45,7 +51,9 @@ class SshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('user@host:2222', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -vv -o BatchMode=yes -p 2222 \'user@host\'', $ref->getValue($connector));
     }
@@ -56,7 +64,9 @@ class SshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('user:pass@host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec sshpass -p \'pass\' ssh -vv \'user@host\'', $ref->getValue($connector));
     }
