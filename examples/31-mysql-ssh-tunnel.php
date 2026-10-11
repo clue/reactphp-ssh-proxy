@@ -20,7 +20,13 @@ $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'alice@localhost';
 $proxy = new Clue\React\SshProxy\SshProcessConnector($url);
 
 $url = getenv('MYSQL_LOGIN') !== false ? getenv('MYSQL_LOGIN') : 'user:pass@localhost';
+
+// create MySQL factory without raising deprecation notice on PHP 8.4+
+// need this hack until react/mysql v0.7.0 ships https://github.com/friends-of-reactphp/mysql/pull/203
+set_error_handler(function () { }, E_DEPRECATED);
 $factory = new React\MySQL\Factory(null, $proxy);
+restore_error_handler();
+
 $client = $factory->createLazyConnection($url);
 
 $client->query('SELECT * FROM (SELECT "foo" UNION SELECT "bar") data')->then(function (React\MySQL\QueryResult $query) {

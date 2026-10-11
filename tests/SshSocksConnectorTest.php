@@ -123,6 +123,12 @@ class SshSocksConnectorTest extends TestCase
         new SshSocksConnector('host?bind=example:1080', $loop);
     }
 
+    public function testConstructorThrowsForInvalidLoop()
+    {
+        $this->setExpectedException('InvalidArgumentException', 'Argument #2 ($loop) expected null|React\EventLoop\LoopInterface');
+        new SshSocksConnector('host', 'loop');
+    }
+
     /**
      * @doesNotPerformAssertions
      */
