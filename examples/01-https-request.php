@@ -1,6 +1,6 @@
 <?php
 
-// A simple example which uses an HTTP client to requesthttps://example.com/ through an SSH proxy server.
+// A simple example which uses an HTTP client to request https://example.com/ through an SSH proxy server.
 // The proxy can be given through the SSH_PROXY env and defaults to localhost otherwise.
 //
 // You can assign the SSH_PROXY environment and prefix this with a space to make
@@ -13,7 +13,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $url = getenv('SSH_PROXY') !== false ? getenv('SSH_PROXY') : 'alice@localhost';
 
-$proxy = new Clue\React\SshProxy\SshProcessConnector($url);
+$proxy = new Clue\React\SshProxy\SshSocksConnector($url);
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,

@@ -79,7 +79,7 @@ secure HTTPS request to google.com through a remote SSH server:
 
 require __DIR__ . '/vendor/autoload.php';
 
-$proxy = new Clue\React\SshProxy\SshProcessConnector('alice@example.com');
+$proxy = new Clue\React\SshProxy\SshSocksConnector('alice@example.com');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
@@ -404,7 +404,7 @@ $connection->query('SELECT * FROM book')->then(
 $connection->quit();
 ```
 
-See also [example #21](examples) for more details.
+See also [example #31](examples) for more details.
 
 This example will automatically launch the `ssh` client binary to create the
 connection to a database server that can not otherwise be accessed from the
