@@ -12,7 +12,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'loop');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $loop = $ref->getValue($connector);
 
         $this->assertInstanceOf('React\EventLoop\LoopInterface', $loop);
@@ -24,7 +26,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.0.0.1:1080\' \'host\'', $ref->getValue($connector));
     }
@@ -35,7 +39,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host:22', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.0.0.1:1080\' \'host\'', $ref->getValue($connector));
     }
@@ -46,7 +52,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('user@host:2222', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -p 2222 -D \'127.0.0.1:1080\' \'user@host\'', $ref->getValue($connector));
     }
@@ -57,7 +65,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('user:pass@host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec sshpass -p \'pass\' ssh -v -o ExitOnForwardFailure=yes -N -D \'127.0.0.1:1080\' \'user@host\'', $ref->getValue($connector));
     }
@@ -68,7 +78,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host?bind=127.1.0.1:2711', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'127.1.0.1:2711\' \'host\'', $ref->getValue($connector));
     }
@@ -79,7 +91,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host?bind=[::1]:2711', $loop);
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
 
         $this->assertEquals('exec ssh -v -o ExitOnForwardFailure=yes -N -o BatchMode=yes -D \'[::1]:2711\' \'host\'', $ref->getValue($connector));
     }
@@ -200,7 +214,9 @@ class SshSocksConnectorTest extends TestCase
 
         $timer = $this->getMockBuilder('React\EventLoop\TimerInterface')->getMock();
         $ref = new \ReflectionProperty($connector, 'idleTimer');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $timer);
 
         $connector->connect('google.com:80');
@@ -214,7 +230,9 @@ class SshSocksConnectorTest extends TestCase
 
         $deferred = new Deferred();
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $deferred->promise());
 
         $promise = $connector->connect('google.com:80');
@@ -238,7 +256,9 @@ class SshSocksConnectorTest extends TestCase
 
         $deferred = new Deferred();
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $deferred->promise());
 
         $first = $connector->connect('google.com:80');
@@ -259,7 +279,9 @@ class SshSocksConnectorTest extends TestCase
 
         $deferred = new Deferred();
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $deferred->promise());
 
         $promise = $connector->connect('google.com:80');
@@ -275,7 +297,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $deferred = new Deferred();
@@ -283,7 +307,9 @@ class SshSocksConnectorTest extends TestCase
         $socks->expects($this->once())->method('connect')->with('google.com:80')->willReturn($deferred->promise());
 
         $ref = new \ReflectionProperty($connector, 'socks');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');
@@ -297,7 +323,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $deferred = new Deferred(function () {
@@ -307,7 +335,9 @@ class SshSocksConnectorTest extends TestCase
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
         $ref = new \ReflectionProperty($connector, 'socks');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');
@@ -330,7 +360,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $deferred = new Deferred();
@@ -338,7 +370,9 @@ class SshSocksConnectorTest extends TestCase
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
         $ref = new \ReflectionProperty($connector, 'socks');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');
@@ -361,7 +395,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $connection = $this->getMockBuilder('React\Socket\ConnectionInterface')->getMock();
@@ -372,7 +408,9 @@ class SshSocksConnectorTest extends TestCase
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
         $ref = new \ReflectionProperty($connector, 'socks');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');
@@ -388,7 +426,9 @@ class SshSocksConnectorTest extends TestCase
         $connector = new SshSocksConnector('host', $loop);
 
         $ref = new \ReflectionProperty($connector, 'listen');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, \React\Promise\resolve(null));
 
         $connection = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close'))->getMock();
@@ -399,7 +439,9 @@ class SshSocksConnectorTest extends TestCase
         $socks->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
         $ref = new \ReflectionProperty($connector, 'socks');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, $socks);
 
         $promise = $connector->connect('google.com:80');

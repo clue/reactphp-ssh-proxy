@@ -13,7 +13,9 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, 'echo "debug2: channel 0: open confirm rwindow 2097152 rmax 32768" >&2; #');
 
         $promise = $connector->connect('example.com:80');
@@ -27,7 +29,9 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, 'echo "channel 0: open failed: administratively prohibited: open failed" >&2; #');
 
         $promise = $connector->connect('example.com:80');
@@ -41,7 +45,9 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, 'echo foo >&2; #');
 
         $promise = $connector->connect('example.com:80');
@@ -55,7 +61,9 @@ class IntegrationSshProcessConnectorTest extends TestCase
         $connector = new SshProcessConnector('host');
 
         $ref = new \ReflectionProperty($connector, 'cmd');
-        $ref->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
         $ref->setValue($connector, 'echo "debug2: channel 0: open confirm rwindow 2097152 rmax 32768" >&2; echo foo #');
 
         $promise = $connector->connect('example.com:80');
