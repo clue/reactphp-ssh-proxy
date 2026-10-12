@@ -13,6 +13,7 @@ class LineSeparatedReader extends EventEmitter implements ReadableStreamInterfac
     private $stream;
     private $buffer = '';
     private $closed = false;
+    private $maxlength = 65536;
 
     public function __construct(ReadableStreamInterface $stream)
     {
@@ -53,11 +54,15 @@ class LineSeparatedReader extends EventEmitter implements ReadableStreamInterfac
     {
         $this->buffer .= $chunk;
 
-        while (($pos = strpos($this->buffer, "\n")) !== false) {
+        while (($pos = strpos($this->buffer, "\n")) !== false && $pos <= $this->maxlength) {
             $chunk = rtrim(substr($this->buffer, 0, $pos), "\r\n");
             $this->buffer = (string)substr($this->buffer, $pos + 1);
 
             $this->emit('data', array($chunk));
+        }
+
+        if (isset($this->buffer[$this->maxlength])) {
+            $this->handleError(new \OverflowException('Buffer size exceeded'));
         }
     }
 
