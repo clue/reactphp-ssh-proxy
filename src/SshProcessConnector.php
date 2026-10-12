@@ -153,7 +153,7 @@ class SshProcessConnector implements ConnectorInterface
             }
             $deferred->reject(new \RuntimeException(
                 'Connection to ' . $uri . ' failed because SSH client died (' . $last . ')',
-                $code
+                (int) $code
             ));
         });
 
