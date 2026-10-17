@@ -105,11 +105,13 @@ class SshSocksConnector implements ConnectorInterface
         }
 
         // no listening SSH client process started? start one and remember reference
-        // if spawning SSH client process fails, clear reference for next start
+        // if spawning SSH client process fails, clear reference for next start unless already replaced
         if ($this->listen === null) {
             $listen =& $this->listen;
-            $this->listen = $this->listen()->then(null, function ($e) use (&$listen) {
-                $listen = null;
+            $this->listen = $promise = $this->listen()->then(null, function ($e) use (&$listen, &$promise) {
+                if ($listen === $promise) {
+                    $listen = null;
+                }
                 throw $e;
             });
 
