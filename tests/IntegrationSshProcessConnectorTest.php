@@ -74,6 +74,22 @@ class IntegrationSshProcessConnectorTest extends TestCase
         Loop::run();
     }
 
+    public function testConnectWillRejectWithExceptionAndTerminateProcessWhenProcessOutputsLineExceedingMaximumBufferSize()
+    {
+        $connector = new SshProcessConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'head -c 70000 /dev/zero | tr "\0" a >&2; exec sleep 10; #');
+
+        $promise = $connector->connect('example.com:80');
+
+        $this->setExpectedException('RuntimeException', 'Connection to example.com:80 failed because SSH client died (Buffer size exceeded)');
+        \React\Async\await($promise);
+    }
+
     public function testConnectWillResolveWithConnectionThatWillEmitImmediateDataFromProcessStdoutAfterChannelOpenConfirmMessage()
     {
         $connector = new SshProcessConnector('host');

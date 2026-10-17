@@ -36,6 +36,54 @@ class LineSeparatedReaderTest extends TestCase
         $input->write("hello!\nignored");
     }
 
+    public function testStreamDataWillEmitDataWhenDataContainsNewlineAtMaximumBufferSize()
+    {
+        $input = new ThroughStream();
+        $stream = new LineSeparatedReader($input);
+
+        $stream->on('data', $this->expectCallableOnceWith(str_repeat('a', 65536)));
+        $stream->on('error', $this->expectCallableNever());
+
+        $input->write(str_repeat('a', 65536));
+        $input->write("\n");
+    }
+
+    public function testStreamDataWillEmitErrorAndCloseWhenDataExceedsMaximumBufferSize()
+    {
+        $input = new ThroughStream();
+        $stream = new LineSeparatedReader($input);
+
+        $stream->on('data', $this->expectCallableNever());
+        $stream->on('error', $this->expectCallableOnceWith($this->isInstanceOf('OverflowException')));
+        $stream->on('close', $this->expectCallableOnce());
+
+        $input->write(str_repeat('a', 40000));
+        $input->write(str_repeat('a', 40000));
+    }
+
+    public function testStreamDataWillEmitErrorAndCloseWhenDataContainsNewlineBehindMaximumBufferSize()
+    {
+        $input = new ThroughStream();
+        $stream = new LineSeparatedReader($input);
+
+        $stream->on('data', $this->expectCallableNever());
+        $stream->on('error', $this->expectCallableOnceWith($this->isInstanceOf('OverflowException')));
+        $stream->on('close', $this->expectCallableOnce());
+
+        $input->write(str_repeat('a', 65537) . "\n");
+    }
+
+    public function testStreamDataWillEmitDataAndErrorWhenDataBehindNewlineExceedsMaximumBufferSize()
+    {
+        $input = new ThroughStream();
+        $stream = new LineSeparatedReader($input);
+
+        $stream->on('data', $this->expectCallableOnceWith("hello!"));
+        $stream->on('error', $this->expectCallableOnceWith($this->isInstanceOf('OverflowException')));
+
+        $input->write("hello!\n" . str_repeat('a', 65537));
+    }
+
 
     public function testStreamEndWillEndWithoutDataWhenNoPreviousDataInBuffer()
     {

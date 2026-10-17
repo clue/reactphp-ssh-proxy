@@ -243,6 +243,12 @@ class SshSocksConnector implements ConnectorInterface
             }
         });
 
+        // terminate process if STDERR fails, e.g. because of excessive line length
+        $stderr->on('error', function (\Exception $e) use ($process, &$last) {
+            $last = $e->getMessage();
+            $process->terminate();
+        });
+
         $process->on('exit', function ($code) use ($deferred, &$last) {
             $deferred->reject(new \RuntimeException(
                 $last,

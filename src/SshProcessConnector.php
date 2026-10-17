@@ -138,6 +138,12 @@ class SshProcessConnector implements ConnectorInterface
             $connected = true;
         });
 
+        // terminate process if STDERR fails, e.g. because of excessive line length
+        $stderr->on('error', function (\Exception $e) use ($process, &$last) {
+            $last = $e->getMessage();
+            $process->terminate();
+        });
+
         // If STDERR closes before connection was established, explicitly close STDOUT stream.
         // The STDOUT stream starts in a paused state and as such will prevent the process exit
         // logic from triggering when it is not resumed.
