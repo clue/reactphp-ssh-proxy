@@ -85,9 +85,11 @@ class SshProcessConnector implements ConnectorInterface
         $process = Io\processWithoutFds($command);
         $process->start($this->loop);
 
+        // @codeCoverageIgnoreStart
         if ($this->debug) {
-            echo 'Launched "' . $command . '" with PID ' . $process->getPid() . PHP_EOL; // @codeCoverageIgnore
+            echo 'Launched "' . $command . '" with PID ' . $process->getPid() . PHP_EOL;
         }
+        // @codeCoverageIgnoreEnd
 
         $deferred = new Deferred(function () use ($process, $uri) {
             $process->stdin->close();
@@ -106,9 +108,11 @@ class SshProcessConnector implements ConnectorInterface
             // remember last line for error output in case process exits
             $last = $line;
 
+            // @codeCoverageIgnoreStart
             if ($debug) {
-                echo \addcslashes($line, "\0..\032") . PHP_EOL; // @codeCoverageIgnore
+                echo \addcslashes($line, "\0..\032") . PHP_EOL;
             }
+            // @codeCoverageIgnoreEnd
 
             // match everything related to our forwarding channel
             // forwarding error will be printed right to stderr
@@ -154,9 +158,12 @@ class SshProcessConnector implements ConnectorInterface
         });
 
         $process->on('exit', function ($code) use ($deferred, $uri, &$last, $debug) {
+            // @codeCoverageIgnoreStart
             if ($debug) {
-                echo 'Process exit with code ' . $code . PHP_EOL; // @codeCoverageIgnore
+                echo 'Process exit with code ' . $code . PHP_EOL;
             }
+            // @codeCoverageIgnoreEnd
+
             $deferred->reject(new \RuntimeException(
                 'Connection to ' . $uri . ' failed because SSH client died (' . $last . ')',
                 (int) $code

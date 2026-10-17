@@ -56,6 +56,22 @@ class IntegrationSshProcessConnectorTest extends TestCase
         Loop::run();
     }
 
+    public function testConnectWillRejectWithExceptionWhenProcessOutputsEndsAfterChannelMessageWithoutOpenConfirm()
+    {
+        $connector = new SshProcessConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'echo "debug1: channel 0: new stdio-forward [stdio-forward] (inactive timeout: 0)" >&2; #');
+
+        $promise = $connector->connect('example.com:80');
+        $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        Loop::run();
+    }
+
     public function testConnectCancellationWillRejectWithException()
     {
         $connector = new SshProcessConnector('host');
