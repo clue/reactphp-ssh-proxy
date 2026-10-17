@@ -191,6 +191,43 @@ class IntegrationSshSocksConnectorTest extends TestCase
         Loop::run();
     }
 
+    public function testConnectWillStartNewProcessWhenPreviousProcessExitsAfterPortListenerMessage()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'echo "debug1: channel 0: new [port listener]" >&2; exec sleep 0.1; #');
+
+        $deferred = new Deferred();
+        $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
+        $socks->expects($this->once())->method('connect')->with('example.com:80')->willReturn($deferred->promise());
+
+        $ref = new \ReflectionProperty($connector, 'socks');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, $socks);
+
+        $connector->connect('example.com:80');
+
+        $onRejected = $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException'));
+        Loop::addTimer(0.5, function () use ($connector, $onRejected) {
+            $ref = new \ReflectionProperty($connector, 'cmd');
+            if (PHP_VERSION_ID < 80100) {
+                $ref->setAccessible(true);
+            }
+            $ref->setValue($connector, 'echo "Connection closed by remote host" >&2; exit 255; #');
+
+            $promise = $connector->connect('example.com:80');
+            $promise->then(null, $onRejected);
+        });
+
+        Loop::run();
+    }
+
     public function testConnectWillTerminateNewProcessWhenPreviousProcessExitsLateAfterIdleTimeout()
     {
         $connector = new SshSocksConnector('host');
