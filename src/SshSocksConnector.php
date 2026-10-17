@@ -198,6 +198,8 @@ class SshSocksConnector implements ConnectorInterface
             $this->idleTimer = $this->loop->addTimer($this->idlePeriod, function () use (&$listen, $debug) {
                 $listen->then(function (Process $process) {
                     $process->terminate();
+                }, function () {
+                    // ignore to avoid reporting unhandled rejection
                 });
                 $listen->cancel();
                 $listen = null;
