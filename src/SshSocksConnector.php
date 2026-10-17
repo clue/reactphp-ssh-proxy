@@ -148,8 +148,12 @@ class SshSocksConnector implements ConnectorInterface
             throw new \RuntimeException('Connection to ' . $uri . ' cancelled while waiting for SSH client');
         });
 
-        $this->listen->then(function () use ($uri, $that, $socks, $deferred, &$connecting) {
-            // SSH client process started => start SOCKS connection
+        $this->listen->then(function () use ($uri, $that, $socks, $deferred, &$connecting, &$cancelled) {
+            // SSH client process started => start SOCKS connection (unless connection attempt has already been cancelled)
+            if ($cancelled) {
+                return;
+            }
+
             $connecting = $socks->connect($uri)->then(function (ConnectionInterface $connection) use ($that, $deferred) {
                 // connection to SOCKS server successful => consider idle when connection closes again
                 $connection->on('close', function () use ($that) {

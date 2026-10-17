@@ -161,6 +161,36 @@ class IntegrationSshSocksConnectorTest extends TestCase
         Loop::run();
     }
 
+    public function testConnectCancellationWillNotInvokeSocksConnectorWhenProcessBecomesReadyForOtherPendingConnection()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'echo "debug1: channel 0: new [port listener]" >&2; exec sleep 10; #');
+
+        $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
+        $socks->expects($this->once())->method('connect')->with('example.com:81')->willReturn(\React\Promise\reject(new \RuntimeException('Connection refused')));
+
+        $ref = new \ReflectionProperty($connector, 'socks');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, $socks);
+
+        $first = $connector->connect('example.com:80');
+        $first->cancel();
+
+        $first->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        $second = $connector->connect('example.com:81');
+        $second->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        Loop::run();
+    }
+
     public function testConnectWillTerminateNewProcessWhenPreviousProcessExitsLateAfterIdleTimeout()
     {
         $connector = new SshSocksConnector('host');
