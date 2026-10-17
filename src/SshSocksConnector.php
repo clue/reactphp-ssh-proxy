@@ -246,7 +246,7 @@ class SshSocksConnector implements ConnectorInterface
         $process->on('exit', function ($code) use ($deferred, &$last) {
             $deferred->reject(new \RuntimeException(
                 $last,
-                $code
+                (int) $code
             ));
         });
 

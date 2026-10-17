@@ -5,6 +5,7 @@ namespace Clue\Tests\React\SshProxy;
 use Clue\React\SshProxy\SshSocksConnector;
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 
 class IntegrationSshSocksConnectorTest extends TestCase
 {
@@ -75,5 +76,45 @@ class IntegrationSshSocksConnectorTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
 
         Loop::run();
+    }
+
+    public function testConnectWillRejectWithExceptionAndTerminateIdleProcessWhenSocksConnectorRejects()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'echo "debug1: channel 0: new [port listener]" >&2; exec sleep 10; #');
+
+        $socks = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
+        $socks->expects($this->once())->method('connect')->willReturn(\React\Promise\reject(new \RuntimeException('Connection refused')));
+
+        $ref = new \ReflectionProperty($connector, 'socks');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, $socks);
+
+        $promise = $connector->connect('example.com:80');
+        $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        $ref = new \ReflectionProperty($connector, 'listen');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $listen = $ref->getValue($connector);
+        assert($listen instanceof PromiseInterface);
+
+        $process = null;
+        $listen->then(function ($value) use (&$process) {
+            $process = $value;
+        });
+
+        Loop::run();
+
+        $this->assertInstanceOf('React\ChildProcess\Process', $process);
+        $this->assertTrue($process->isTerminated());
     }
 }
