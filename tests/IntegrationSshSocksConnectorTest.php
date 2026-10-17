@@ -136,6 +136,31 @@ class IntegrationSshSocksConnectorTest extends TestCase
         Loop::run();
     }
 
+    public function testConnectCancellationWillRejectWithExceptionWhenProcessExitsBeforeIdleTimeout()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'exec false; #');
+
+        // delay idle timer, so process exit is reported before idle timer fires
+        $ref = new \ReflectionProperty($connector, 'idlePeriod');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 0.2);
+
+        $promise = $connector->connect('example.com:80');
+        $promise->cancel();
+
+        $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        Loop::run();
+    }
+
     public function testConnectWillRejectWithExceptionAndTerminateProcessWhenProcessOutputsLineExceedingMaximumBufferSize()
     {
         $connector = new SshSocksConnector('host');
