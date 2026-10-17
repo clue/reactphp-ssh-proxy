@@ -118,6 +118,24 @@ class IntegrationSshSocksConnectorTest extends TestCase
         $this->assertTrue($process->isTerminated());
     }
 
+    public function testConnectCancellationWillRejectWithException()
+    {
+        $connector = new SshSocksConnector('host');
+
+        $ref = new \ReflectionProperty($connector, 'cmd');
+        if (PHP_VERSION_ID < 80100) {
+            $ref->setAccessible(true);
+        }
+        $ref->setValue($connector, 'exec sleep 10; #');
+
+        $promise = $connector->connect('example.com:80');
+        $promise->cancel();
+
+        $promise->then(null, $this->expectCallableOnceWith($this->isInstanceOf('RuntimeException')));
+
+        Loop::run();
+    }
+
     public function testConnectWillRejectWithExceptionAndTerminateProcessWhenProcessOutputsLineExceedingMaximumBufferSize()
     {
         $connector = new SshSocksConnector('host');
