@@ -105,13 +105,8 @@ class SshSocksConnector implements ConnectorInterface
         }
 
         // no listening SSH client process started? start one and remember reference
-        // if spawning SSH client process fails, clear reference for next start
         if ($this->listen === null) {
-            $listen =& $this->listen;
-            $this->listen = $this->listen()->then(null, function ($e) use (&$listen) {
-                $listen = null;
-                throw $e;
-            });
+            $this->listen = $this->listen();
 
             // @codeCoverageIgnoreStart
             if ($this->debug) {
@@ -146,8 +141,12 @@ class SshSocksConnector implements ConnectorInterface
             throw new \RuntimeException('Connection to ' . $uri . ' cancelled while waiting for SSH client');
         });
 
-        $this->listen->then(function () use ($uri, $that, $socks, $deferred, &$connecting) {
-            // SSH client process started => start SOCKS connection
+        $this->listen->then(function () use ($uri, $that, $socks, $deferred, &$connecting, &$cancelled) {
+            // SSH client process started => start SOCKS connection (unless connection attempt has already been cancelled)
+            if ($cancelled) {
+                return;
+            }
+
             $connecting = $socks->connect($uri)->then(function (ConnectionInterface $connection) use ($that, $deferred) {
                 // connection to SOCKS server successful => consider idle when connection closes again
                 $connection->on('close', function () use ($that) {
@@ -194,14 +193,15 @@ class SshSocksConnector implements ConnectorInterface
 
         if ($this->pending < 1 && $this->idleTimer === null && $this->listen !== null) {
             $listen =& $this->listen;
+            $promise = $this->listen;
             $debug = $this->debug;
-            $this->idleTimer = $this->loop->addTimer($this->idlePeriod, function () use (&$listen, $debug) {
-                $listen->then(function (Process $process) {
+            $this->idleTimer = $this->loop->addTimer($this->idlePeriod, function () use (&$listen, $promise, $debug) {
+                $promise->then(function (Process $process) {
                     $process->terminate();
                 }, function () {
                     // ignore to avoid reporting unhandled rejection
                 });
-                $listen->cancel();
+                $promise->cancel();
                 $listen = null;
 
                 // @codeCoverageIgnoreStart
@@ -255,13 +255,20 @@ class SshSocksConnector implements ConnectorInterface
             $process->terminate();
         });
 
-        $process->on('exit', function ($code) use ($deferred, &$last) {
+        // if SSH client process exits, clear reference for next start unless already replaced
+        $listen =& $this->listen;
+        $promise = $deferred->promise();
+        $process->on('exit', function ($code) use ($deferred, &$last, &$listen, $promise) {
+            if ($listen === $promise) {
+                $listen = null;
+            }
+
             $deferred->reject(new \RuntimeException(
                 $last,
                 (int) $code
             ));
         });
 
-        return $deferred->promise();
+        return $promise;
     }
 }
