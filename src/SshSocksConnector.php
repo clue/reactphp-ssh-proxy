@@ -204,9 +204,11 @@ class SshSocksConnector implements ConnectorInterface
                 $listen->cancel();
                 $listen = null;
 
+                // @codeCoverageIgnoreStart
                 if ($debug) {
-                    echo 'Stopped listening' . PHP_EOL; // @codeCoverageIgnore
+                    echo 'Stopped listening' . PHP_EOL;
                 }
+                // @codeCoverageIgnoreEnd
             });
         }
     }
@@ -232,9 +234,11 @@ class SshSocksConnector implements ConnectorInterface
             // Could not request local forwarding.
             $last = $line;
 
+            // @codeCoverageIgnoreStart
             if ($debug) {
-                echo \addcslashes($line, "\0..\032") . PHP_EOL; // @codeCoverageIgnore
+                echo \addcslashes($line, "\0..\032") . PHP_EOL;
             }
+            // @codeCoverageIgnoreEnd
 
             // match everything related to our forwarding channel
             // forwarding success will only be reported to stderr via debug1 / -v
