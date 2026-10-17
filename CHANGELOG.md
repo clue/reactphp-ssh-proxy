@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.0 (2026-10-17)
+
+*   Feature: Support OpenSSH 9.2+ for `SshSocksConnector`.
+    (#48 by @clue)
+
+*   Feature: Improve PHP 8.5+, PHP 8.4+, PHP 8.3+, PHP 8.2+ and PHP 8.1+ support.
+    (#44, #45, #46, #47 and #50 by @clue)
+
+*   Feature / Fix: Improve SSH client process handling, limit `STDERR` buffer and avoid race conditions.
+    (#51, #52 and #54 by @clue)
+
+*   Improve documentation and examples.
+    (#49 by @clue)
+
+*   Improve test suite to ensure 100% code coverage and support legacy PHP 7.2 with PHPUnit 8.5.
+    (#42, #43 and #53 by @clue)
+
 ## 1.4.0 (2022-09-02)
 
 *   Feature: Full support for PHP 8.1 and PHP 8.2.
